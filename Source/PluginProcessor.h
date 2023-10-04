@@ -63,9 +63,11 @@ public:
 private:
     juce::dsp::Compressor<float> compressor;
 
-    juce::AudioParameterFloat* attack{ nullptr };
-    juce::AudioParameterFloat* release{ nullptr };
-    juce::AudioParameterFloat* threshold{ nullptr };
+    using APF = juce::AudioParameterFloat;
+
+    APF* attack{ nullptr };
+    APF* release{ nullptr };
+    APF* threshold{ nullptr };
 
     juce::AudioParameterChoice* ratio{ nullptr };
     //==============================================================================
