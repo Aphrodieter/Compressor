@@ -22,14 +22,16 @@ CompressorAudioProcessor::CompressorAudioProcessor()
                        )
 #endif
 {
-    attack = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Attack"));
-    jassert(attack != nullptr);
-    release = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Release"));
-    jassert(release != nullptr);
-    threshold = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Threshold"));
-    jassert(threshold != nullptr);
-    ratio = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter("Ratio"));
-    jassert(ratio != nullptr);
+    compressorBand.attack = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Attack"));
+    
+    compressorBand.release = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Release"));
+
+    compressorBand.threshold = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Threshold"));
+
+    compressorBand.ratio = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter("Ratio"));
+
+    compressorBand.bypassed = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter("Bypassed"));
+
 }
 
 CompressorAudioProcessor::~CompressorAudioProcessor()
@@ -109,7 +111,7 @@ void CompressorAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     spec.numChannels = getTotalNumOutputChannels();
     spec.sampleRate = sampleRate;
 
-    compressor.prepare(spec);
+    compressorBand.prepare(spec);
 }
 
 void CompressorAudioProcessor::releaseResources()
@@ -159,17 +161,11 @@ void CompressorAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-
-    compressor.setAttack(attack->get());
-    compressor.setRelease(release->get());
-    compressor.setThreshold(threshold->get());
-    compressor.setRatio(ratio->getCurrentChoiceName().getFloatValue());
+    
+    compressorBand.updateSettings();
 
 
-    auto block = juce::dsp::AudioBlock<float>(buffer);
-    auto context = juce::dsp::ProcessContextReplacing<float>(block);
-
-    compressor.process(context);
+    compressorBand.process(buffer);
   
 }
 
@@ -230,6 +226,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
         "Ratio",
         juce::StringArray({"1", "1.5", "2.5","4", "6", "10", "20", "100"}),
         3));
+
+    layout.add(std::make_unique<AudioParameterBool>(
+        "Bypassed",
+        "Bypassed",
+        false
+    ));
 
     return layout;
 }
