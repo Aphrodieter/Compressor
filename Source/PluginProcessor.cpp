@@ -22,15 +22,45 @@ CompressorAudioProcessor::CompressorAudioProcessor()
                        )
 #endif
 {
-    compressorBand.attack = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Attack"));
+
+    /*using namespace Params;
+    const auto& params = getParams();
+
+    auto floatHelper = [&apvts = this->apvts, &params](auto& param, const auto& parameterName)
+        {
+            auto param =  dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(params.at(parameterName));
+            jassert(param != nullptr);
+        };
+
+    auto choiceHelper = [&apvts = this->apvts, &params](auto& param, const auto& parameterName)
+        {
+            auto param = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter(params.at(parameterName));
+            jassert(param != nullptr);
+        };
+
+    auto boolHelper = [&apvts = this->apvts, &params](auto& param, const auto& parameterName)
+        {
+            auto param = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(params.at(parameterName));
+            jassert(param != nullptr);
+        };
+
+    floatHelper(compressorBand.attack, Names::Attack_Low_Band);
+    floatHelper(compressorBand.attack, Names::Release_Low_Band);
+    floatHelper(compressorBand.attack, Names::Threshold_Low_Band);
+    floatHelper(compressorBand.attack, Names::Ratio_Low_Band);
+    floatHelper(compressorBand.attack, Names::Bypassed_Low_Band);*/
+
+    const auto& params = Params::getParams();
+
+    compressorBand.attack = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(params.at(Params::Names::Attack_Low_Band)));
     
-    compressorBand.release = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Release"));
+    compressorBand.release = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(params.at(Params::Names::Release_Low_Band)));
 
-    compressorBand.threshold = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Threshold"));
+    compressorBand.threshold = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(params.at(Params::Names::Threshold_Low_Band)));
 
-    compressorBand.ratio = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter("Ratio"));
+    compressorBand.ratio = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter(params.at(Params::Names::Ratio_Low_Band)));
 
-    compressorBand.bypassed = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter("Bypassed"));
+    compressorBand.bypassed = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(params.at(Params::Names::Bypassed_Low_Band)));
 
 }
 
@@ -202,34 +232,37 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
     APVTS::ParameterLayout layout;
 
     using namespace juce;
+    using namespace Params;
+
+    const auto& params = getParams();
 
     layout.add(std::make_unique<AudioParameterFloat>(
-        "Threshold",
-        "Threshold",
+        params.at(Names::Threshold_Low_Band),
+        params.at(Names::Threshold_Low_Band),
         NormalisableRange<float>(-60, 12, 1, 1),
         0));
 
     layout.add(std::make_unique<AudioParameterFloat>(
-        "Attack",
-        "Attack",
+        params.at(Names::Attack_Low_Band),
+              params.at(Names::Attack_Low_Band),
         NormalisableRange<float>(5, 500, 1, 1),
         50));
 
     layout.add(std::make_unique<AudioParameterFloat>(
-        "Release",
-        "Release",
+        params.at(Names::Release_Low_Band),
+              params.at(Names::Release_Low_Band),
         NormalisableRange<float>(5, 500, 1, 1),
         50));
 
     layout.add(std::make_unique<AudioParameterChoice>(
-        "Ratio",
-        "Ratio",
+        params.at(Names::Ratio_Low_Band),
+              params.at(Names::Ratio_Low_Band),
         juce::StringArray({"1", "1.5", "2.5","4", "6", "10", "20", "100"}),
         3));
 
     layout.add(std::make_unique<AudioParameterBool>(
-        "Bypassed",
-        "Bypassed",
+        params.at(Names::Bypassed_Low_Band),
+              params.at(Names::Bypassed_Low_Band),
         false
     ));
 
