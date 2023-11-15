@@ -89,22 +89,27 @@ template <typename SampleType>
 SampleType Compressor<SampleType>::processSample(int channel, SampleType inputValue)
 {
     // Ballistics filter with peak rectifier
-    auto env = envelopeFilter.processSample(channel, inputValue);
-    env = juce::Decibels::gainToDecibels(env, minus_inf);
+    //auto env = envelopeFilter.processSample(channel, inputValue);
+    //env = juce::Decibels::gainToDecibels(env, minus_inf);
 
-    // VCA
-    /* auto gain = (env < threshold) ? static_cast<SampleType> (1.0)
-                                    : std::pow (env * thresholdInverse, ratioInverse - static_cast<SampleType> (1.0));*/
-    auto y = (env < thresholddB) ? env : thresholddB + ((env - thresholddB) / ratio);
-    auto gain = juce::Decibels::decibelsToGain(y - env, minus_inf);
+    //// VCA
+    ///* auto gain = (env < threshold) ? static_cast<SampleType> (1.0)
+    //                                : std::pow (env * thresholdInverse, ratioInverse - static_cast<SampleType> (1.0));*/
+    //auto y = (env < thresholddB) ? env : thresholddB + ((env - thresholddB) / ratio);
+    //auto gain = juce::Decibels::decibelsToGain(y - env, minus_inf);
     // Output
-    return gain * inputValue;
+    auto input = juce::Decibels::gainToDecibels(abs(inputValue));
+    DBG("input: " << input << " threshold: " << thresholddB);
+    auto y = (input <= thresholddB) ? input : thresholddB + (input - thresholddB) / ratio;
+    auto gain = juce::Decibels::decibelsToGain(y - input);
+    return inputValue * gain;
 }
 
 template <typename SampleType>
 void Compressor<SampleType>::update()
 {
     threshold = juce::Decibels::decibelsToGain(thresholddB, minus_inf);
+    //DBG(threshold);
     thresholdInverse = static_cast<SampleType> (1.0) / threshold;
     ratioInverse = static_cast<SampleType> (1.0) / ratio;
 
