@@ -28,7 +28,7 @@ CompressorAudioProcessor::CompressorAudioProcessor()
     jassert(release != nullptr);
     threshold = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Threshold"));
     jassert(threshold != nullptr);
-    ratio = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter("Ratio"));
+    ratio = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Ratio"));
     jassert(ratio != nullptr);
 }
 
@@ -163,7 +163,7 @@ void CompressorAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     compressor.setAttack(attack->get());
     compressor.setRelease(release->get());
     compressor.setThreshold(threshold->get());
-    compressor.setRatio(ratio->getCurrentChoiceName().getFloatValue());
+    compressor.setRatio(ratio->get());
 
 
     auto block = juce::dsp::AudioBlock<float>(buffer);
@@ -217,19 +217,19 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
         "Attack",
         "Attack",
         NormalisableRange<float>(5, 500, 1, 1),
-        50));
+        5));
 
     layout.add(std::make_unique<AudioParameterFloat>(
         "Release",
         "Release",
         NormalisableRange<float>(5, 500, 1, 1),
-        50));
+        200));
 
-    layout.add(std::make_unique<AudioParameterChoice>(
+    layout.add(std::make_unique<AudioParameterFloat>(
         "Ratio",
         "Ratio",
-        juce::StringArray({"1", "1.5", "2.5","4", "6", "10", "20", "100"}),
-        3));
+        NormalisableRange<float>(1, 100, 0.5, 0.2),
+        4));
 
     return layout;
 }
