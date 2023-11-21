@@ -73,20 +73,20 @@ void MyEnvelopeDetector<SampleType>::reset(SampleType initialValue)
 template <typename SampleType>
 SampleType MyEnvelopeDetector<SampleType>::processSample(int channel, SampleType inputValue)
 {
-    jassert(juce::isPositiveAndBelow(channel, yold.size()));
+    /*jassert(juce::isPositiveAndBelow(channel, yold.size()));
 
     if (levelType == LevelCalculationType::RMS)
         inputValue *= inputValue;
     else
-        inputValue = std::abs(inputValue);
+        inputValue = std::abs(inputValue);*/
 
     SampleType cte = (inputValue > yold[(size_t)channel] ? cteAT : cteRL);
 
     SampleType result = inputValue + cte * (yold[(size_t)channel] - inputValue);
     yold[(size_t)channel] = result;
 
-    if (levelType == LevelCalculationType::RMS)
-        return std::sqrt(result);
+    /*if (levelType == LevelCalculationType::RMS)
+        return std::sqrt(result);*/
 
     return result;
 }
