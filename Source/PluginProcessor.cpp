@@ -30,6 +30,10 @@ CompressorAudioProcessor::CompressorAudioProcessor()
     jassert(threshold != nullptr);
     ratio = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Ratio"));
     jassert(ratio != nullptr);
+    bypass = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter("Bypass"));
+    jassert(bypass != nullptr);
+    RCMode = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter("RCMode"));
+    jassert(RCMode != nullptr);
 }
 
 CompressorAudioProcessor::~CompressorAudioProcessor()
@@ -169,6 +173,12 @@ void CompressorAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     auto block = juce::dsp::AudioBlock<float>(buffer);
     auto context = juce::dsp::ProcessContextReplacing<float>(block);
 
+    if (bypass->get())
+        context.isBypassed = true;
+
+    DBG(RCMode->getParameterIndex());
+    compressor.setRCMode(RCMode->getIndex());
+
     compressor.process(context);
   
 }
@@ -230,6 +240,19 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
         "Ratio",
         NormalisableRange<float>(1, 100, 0.5, 0.2),
         4));
+
+    layout.add(std::make_unique<AudioParameterBool>(
+        "Bypass",
+        "Bypass",
+        false
+    ));
+
+    layout.add(std::make_unique<AudioParameterChoice>(
+        "RCMode",
+        "RC Mode",
+        juce::StringArray("Normal RC", "Procentual RC", "Level RC"),
+        0
+    ));
 
     return layout;
 }

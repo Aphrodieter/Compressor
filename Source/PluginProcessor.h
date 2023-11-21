@@ -9,7 +9,7 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "Compressor.h"
+#include "MyCompressor.h"
 
 //==============================================================================
 /**
@@ -62,14 +62,18 @@ public:
 
     APVTS apvts{ *this, nullptr, "Parameters", createParameterLayout() };
 private:
-    Compressor<float> compressor;
+    MyCompressor<float> compressor;
     
 
     juce::AudioParameterFloat* attack{ nullptr };
     juce::AudioParameterFloat* release{ nullptr };
     juce::AudioParameterFloat* threshold{ nullptr };
-
     juce::AudioParameterFloat* ratio{ nullptr };
+
+    juce::AudioParameterBool* bypass{ nullptr };
+
+    juce::AudioParameterChoice* RCMode{ nullptr };
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CompressorAudioProcessor)
 };
