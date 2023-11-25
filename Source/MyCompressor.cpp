@@ -73,6 +73,13 @@ void MyCompressor<SampleType>::setRelease(SampleType newRelease)
     update();
 }
 
+template <typename SampleType>
+void MyCompressor<SampleType>::setMakeup(SampleType makeup) {
+    makeupgain = makeup;
+    update();
+}
+
+
 //==============================================================================
 template <typename SampleType>
 void MyCompressor<SampleType>::prepare(const juce::dsp::ProcessSpec& spec)
@@ -105,7 +112,7 @@ SampleType MyCompressor<SampleType>::processSample(int channel, SampleType input
     auto x_l = x_g - y_g;
     auto y_l = envelopeFilter.processSample(channel ,x_l);
 
-    auto c = juce::Decibels::decibelsToGain(-y_l, minus_inf);
+    auto c = juce::Decibels::decibelsToGain(SampleType (makeupgain-y_l), minus_inf);
 
 
     /*auto env = envelopeFilter.processSample(channel, inputValue);
@@ -119,6 +126,7 @@ SampleType MyCompressor<SampleType>::processSample(int channel, SampleType input
 
 template <typename SampleType>
 void MyCompressor<SampleType>::setRCMode(int mode) {
+    DBG(mode);
     envelopeFilter.setTC(mode);
 }
 

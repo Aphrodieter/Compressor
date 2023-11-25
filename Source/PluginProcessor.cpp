@@ -22,18 +22,7 @@ CompressorAudioProcessor::CompressorAudioProcessor()
                        )
 #endif
 {
-    attack = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Attack"));
-    jassert(attack != nullptr);
-    release = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Release"));
-    jassert(release != nullptr);
-    threshold = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Threshold"));
-    jassert(threshold != nullptr);
-    ratio = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Ratio"));
-    jassert(ratio != nullptr);
-    bypass = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter("Bypass"));
-    jassert(bypass != nullptr);
-    RCMode = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter("RCMode"));
-    jassert(RCMode != nullptr);
+    LP.init(apvts);
 }
 
 CompressorAudioProcessor::~CompressorAudioProcessor()
@@ -113,7 +102,10 @@ void CompressorAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     spec.numChannels = getTotalNumOutputChannels();
     spec.sampleRate = sampleRate;
 
-    compressor.prepare(spec);
+    
+    
+    LP.prepare(spec);
+    
 }
 
 void CompressorAudioProcessor::releaseResources()
@@ -163,23 +155,12 @@ void CompressorAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-
-    compressor.setAttack(attack->get());
-    compressor.setRelease(release->get());
-    compressor.setThreshold(threshold->get());
-    compressor.setRatio(ratio->get());
+    LP.process(buffer);
+    
 
 
-    auto block = juce::dsp::AudioBlock<float>(buffer);
-    auto context = juce::dsp::ProcessContextReplacing<float>(block);
 
-    if (bypass->get())
-        context.isBypassed = true;
-
-    DBG(RCMode->getParameterIndex());
-    compressor.setRCMode(RCMode->getIndex());
-
-    compressor.process(context);
+    
   
 }
 
@@ -241,6 +222,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
         NormalisableRange<float>(1, 100, 0.5, 0.2),
         4));
 
+    layout.add(std::make_unique<AudioParameterFloat>(
+        "Makeup",
+        "Makeup Gain",
+        NormalisableRange<float>(-120, 12, 0.5, 5),
+        1));
+
     layout.add(std::make_unique<AudioParameterBool>(
         "Bypass",
         "Bypass",
@@ -254,6 +241,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
         0
     ));
 
+    layout.add(std::make_unique<AudioParameterFloat>(
+        "CutoffFrequency",
+        "CutoffFrequency",
+        NormalisableRange<float>(20, 20000, 1, 1),
+        200
+    ));
+
     return layout;
 }
 //==============================================================================
@@ -262,3 +256,4 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new CompressorAudioProcessor();
 }
+

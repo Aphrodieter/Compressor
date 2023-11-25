@@ -55,6 +55,8 @@ public:
     /** Sets the release time in milliseconds of the compressor.*/
     void setRelease(SampleType newRelease);
 
+    void setMakeup(SampleType makeup);
+
     //==============================================================================
     /** Initialises the processor. */
     void prepare(const juce::dsp::ProcessSpec& spec);
@@ -87,7 +89,10 @@ public:
             auto* outputSamples = outputBlock.getChannelPointer(channel);
 
             for (size_t i = 0; i < numSamples; ++i)
+            {
                 outputSamples[i] = processSample((int)channel, inputSamples[i]);
+            }
+          
         }
     }
 
@@ -107,6 +112,6 @@ private:
     SampleType minus_inf = static_cast<SampleType> (-200.0);
 
     double sampleRate = 44100.0;
-    SampleType thresholddB = 0.0, ratio = 1.0, attackTime = 1.0, releaseTime = 100.0;
+    SampleType thresholddB = 0.0, ratio = 1.0, attackTime = 1.0, releaseTime = 100.0, makeupgain = 1.0;
     
 };
