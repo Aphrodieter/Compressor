@@ -27,9 +27,14 @@ CompressorAudioProcessor::CompressorAudioProcessor()
 
 
     low_lowmid_cutoff = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::low_lowmid_cutoff)));
+    lowmid_highmid_cutoff = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::lowmid_highmid_cutoff)));
+    highmid_high_cutoff = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::highmid_high_cutoff)));
 
     low_band_solo = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::low_band_solo)));
+    lowmid_band_solo = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::lowmid_band_solo)));
+    highmid_band_solo = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::highmid_band_solo)));
     high_band_solo = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::high_band_solo)));
+
 
     low_compressor.init(apvts);
 
@@ -112,11 +117,38 @@ void CompressorAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     spec.numChannels = getTotalNumOutputChannels();
     spec.sampleRate = sampleRate;
 
-    low_Band.setType(juce::dsp::LinkwitzRileyFilterType::lowpass);
-    high_Band.setType(juce::dsp::LinkwitzRileyFilterType::highpass);
+    LP1.setType(juce::dsp::LinkwitzRileyFilterType::lowpass);
+    LP2.setType(juce::dsp::LinkwitzRileyFilterType::lowpass);
+    LP3.setType(juce::dsp::LinkwitzRileyFilterType::lowpass);
 
-    low_Band.prepare(spec);
-    high_Band.prepare(spec);
+    HP1.setType(juce::dsp::LinkwitzRileyFilterType::highpass);
+    HP2.setType(juce::dsp::LinkwitzRileyFilterType::highpass);
+    HP3.setType(juce::dsp::LinkwitzRileyFilterType::highpass);
+
+    AP2.setType(juce::dsp::LinkwitzRileyFilterType::allpass);
+    AP3.setType(juce::dsp::LinkwitzRileyFilterType::allpass);
+    AP4.setType(juce::dsp::LinkwitzRileyFilterType::allpass);
+
+    invertedAP1.setType(juce::dsp::LinkwitzRileyFilterType::allpass);
+    invertedAP2.setType(juce::dsp::LinkwitzRileyFilterType::allpass);
+    invertedAP3.setType(juce::dsp::LinkwitzRileyFilterType::allpass);
+
+    LP1.prepare(spec);
+    LP2.prepare(spec);
+    LP3.prepare(spec);
+
+    HP1.prepare(spec);
+    HP2.prepare(spec);
+    HP3.prepare(spec);
+
+    AP2.prepare(spec);
+    AP3.prepare(spec);
+    AP4.prepare(spec);
+
+
+    invertedAP1.prepare(spec);
+    invertedAP2.prepare(spec);
+    invertedAP3.prepare(spec);
 
     low_compressor.prepare(spec);
     
@@ -154,13 +186,11 @@ bool CompressorAudioProcessor::isBusesLayoutSupported (const BusesLayout& layout
 }
 #endif
 
-bool anyOtherBandSoloed(std::array<bool, 2> solos)
+bool anyOtherBandSoloed(const std::array<bool, 4>& solos)
 {
     for (auto& solo : solos)
-    {
         if (solo)
             return true;
-    }
     return false;
 }
 
@@ -180,55 +210,100 @@ void CompressorAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    if (low_compressor.bypass->get())
-        return;
-
-    lowBuffer.makeCopyOf(buffer);
-    highBuffer.makeCopyOf(buffer);
-
-    juce::AudioBuffer<float> difference_buffer;
-    juce::AudioBuffer<float> copy_buffer;
-    difference_buffer.makeCopyOf(buffer);
-    copy_buffer.makeCopyOf(buffer);
-    difference_buffer.applyGain(-1);
-   
-    auto block_low = juce::dsp::AudioBlock<float>(lowBuffer);
-    auto context_low = juce::dsp::ProcessContextReplacing<float>(block_low);
-
-    auto block_high = juce::dsp::AudioBlock<float>(highBuffer);
-    auto context_high = juce::dsp::ProcessContextReplacing<float>(block_high);
-
-    low_Band.setCutoffFrequency(low_lowmid_cutoff->get());
-    high_Band.setCutoffFrequency(low_lowmid_cutoff->get());
     
-    low_Band.process(context_low);
-    high_Band.process(context_high);
+
+   
+    buffers[0] = buffer;
+    buffers[1] = buffer;
+
+    auto block0 = juce::dsp::AudioBlock<float>(buffers[0]);
+    auto block1 = juce::dsp::AudioBlock<float>(buffers[1]);
+    auto block2 = juce::dsp::AudioBlock<float>(buffers[2]);
+    auto block3 = juce::dsp::AudioBlock<float>(buffers[3]);
+    
+         
+    auto context0 = juce::dsp::ProcessContextReplacing<float>(block0);
+    auto context1 = juce::dsp::ProcessContextReplacing<float>(block1);
+    auto context2 = juce::dsp::ProcessContextReplacing<float>(block2);
+    auto context3 = juce::dsp::ProcessContextReplacing<float>(block3);
+    
+    auto cutoff_low_lowmid = low_lowmid_cutoff->get();
+    auto cutoff_lowmid_highmid = lowmid_highmid_cutoff->get();
+    auto cutoff_highmid_high = highmid_high_cutoff->get();
+
+    LP1.setCutoffFrequency(cutoff_low_lowmid);
+    HP1.setCutoffFrequency(cutoff_low_lowmid);
+    AP2.setCutoffFrequency(cutoff_lowmid_highmid);
+    LP2.setCutoffFrequency(cutoff_highmid_high);
+    HP2.setCutoffFrequency(cutoff_highmid_high);
+    AP3.setCutoffFrequency(cutoff_highmid_high);
+    LP3.setCutoffFrequency(cutoff_lowmid_highmid);
+    HP3.setCutoffFrequency(cutoff_lowmid_highmid);
+    AP4.setCutoffFrequency(cutoff_lowmid_highmid);
+
+    invertedAP1.setCutoffFrequency(cutoff_low_lowmid);
+    invertedAP2.setCutoffFrequency(cutoff_lowmid_highmid);
+
+    invertedAP3.setCutoffFrequency(cutoff_highmid_high);
+
+    invertedBuffer.makeCopyOf(buffer);
+    auto invertedBlock = juce::dsp::AudioBlock<float>(invertedBuffer);
+    auto invertedContext = juce::dsp::ProcessContextReplacing<float>(invertedBlock);
+
+    invertedAP1.process(invertedContext);
+    invertedAP2.process(invertedContext);
+    invertedAP3.process(invertedContext);
+
+    invertedBuffer.applyGain(-1);
+
+
+
+    //create lowband
+    LP1.process(context0);
+    AP2.process(context0);
+    AP3.process(context0);
+
+    //create upperband
+    HP1.process(context1);
+
+    //create highband
+    buffers[2] = buffers[1];
+    HP2.process(context2);
+    AP4.process(context2);
+
+    //create center bands
+    LP2.process(context1);
+
+    //create highmid band
+    buffers[3] = buffers[1];
+    HP3.process(context3);
+
+    //create lowmid band
+    LP3.process(context1);
+
+
+   
+
+
+
+
 
     int n = buffer.getNumSamples();
     int channel_n = buffer.getNumChannels();
 
-    std::array<bool, 2> solos = { low_band_solo->get(), high_band_solo->get() };
-
-    std::array<juce::AudioBuffer<float>, 2> buffers = { lowBuffer, highBuffer };
+    std::array<bool, 4> solos = { low_band_solo->get(), lowmid_band_solo->get(), high_band_solo->get() , highmid_band_solo->get()};
 
     buffer.clear();
     for (int i = 0; i < channel_n; i++)
     {
         for (int j = 0; j < buffers.size(); j++)
-        {
             if(solos[j] || !anyOtherBandSoloed(solos))
             buffer.addFrom(i, 0, buffers[j], i, 0, n);
-
-        }
-       /* buffer.addFrom(i, 0, lowBuffer, i, 0, n);
-        buffer.addFrom(i, 0, highBuffer, i, 0, n);*/
-        
-        //buffer.addFrom(i, 0, difference_buffer, i, 0, n);
     }
 
-    DBG("buffer Sample: " << buffer.getSample(0, 5));
-    DBG("Differnce Sample: " << difference_buffer.getSample(0, 5));
-    DBG("");
+    if (low_compressor.bypass->get())
+        for (int i = 0; i < channel_n; i++)
+                buffer.addFrom(i, 0, invertedBuffer, i, 0, n);
    
 }
 
@@ -297,7 +372,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
     layout.add(std::make_unique<AudioParameterFloat>(
         stringmap.at(Params::low_band_makeup),
         stringmap.at(Params::low_band_makeup),
-        NormalisableRange<float>(-120, 12, 0.5, 5),
+        NormalisableRange<float>(-120, 12, 0.5, 10),
         1));
 
     layout.add(std::make_unique<AudioParameterBool>(
@@ -313,16 +388,44 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
         0
     ));
 
+   
+
     layout.add(std::make_unique<AudioParameterFloat>(
         stringmap.at(Params::low_lowmid_cutoff),
         stringmap.at(Params::low_lowmid_cutoff),
-        NormalisableRange<float>(20, 20000, 1, 1),
+        NormalisableRange<float>(20, 999, 1, 0.2),
         200
     ));
 
+    layout.add(std::make_unique<AudioParameterFloat>(
+        stringmap.at(Params::lowmid_highmid_cutoff),
+        stringmap.at(Params::lowmid_highmid_cutoff),
+        NormalisableRange<float>(999, 3999, 1, 0.2),
+        200
+    ));
+
+    layout.add(std::make_unique<AudioParameterFloat>(
+        stringmap.at(Params::highmid_high_cutoff),
+        stringmap.at(Params::highmid_high_cutoff),
+        NormalisableRange<float>(4000, 20000, 1, 0.2),
+        200
+    ));
+
+    
     layout.add(std::make_unique<AudioParameterBool>(
         stringmap.at(Params::low_band_solo),
         stringmap.at(Params::low_band_solo),
+        false
+    ));
+
+    layout.add(std::make_unique<AudioParameterBool>(
+        stringmap.at(Params::lowmid_band_solo),
+        stringmap.at(Params::lowmid_band_solo),
+        false
+    ));
+    layout.add(std::make_unique<AudioParameterBool>(
+        stringmap.at(Params::highmid_band_solo),
+        stringmap.at(Params::highmid_band_solo),
         false
     ));
 

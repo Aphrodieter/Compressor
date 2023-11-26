@@ -228,17 +228,25 @@ public:
 private:
     //MyCompressor<float> compressor;
     Compressorband low_compressor, lowmid_compressor, highmid_compressor, high_compressor;
-    juce::dsp::LinkwitzRileyFilter<float> low_Band, lowmid_Band, highmid_Band, high_Band;
+    juce::dsp::LinkwitzRileyFilter<float> LP1, AP2, AP3,
+                                          HP1, LP2, LP3,
+                                                    HP3,
+                                               HP2, AP4;
 
+    juce::dsp::LinkwitzRileyFilter<float> invertedAP1, invertedAP2, invertedAP3;
 
     juce::AudioParameterFloat* low_lowmid_cutoff{ nullptr };
     juce::AudioParameterFloat* lowmid_highmid_cutoff{ nullptr };
     juce::AudioParameterFloat* highmid_high_cutoff{ nullptr };
 
     juce::AudioParameterBool* low_band_solo{ nullptr };
+    juce::AudioParameterBool* lowmid_band_solo{ nullptr };
+    juce::AudioParameterBool* highmid_band_solo{ nullptr };
     juce::AudioParameterBool* high_band_solo{ nullptr };
+    
 
-    juce::AudioBuffer<float> lowBuffer, lowmidBuffer, lowhighBuffer, highBuffer;
+    juce::AudioBuffer<float> invertedBuffer;
+    std::array<juce::AudioBuffer<float>, 4> buffers;
     
 
     
