@@ -22,7 +22,17 @@ CompressorAudioProcessor::CompressorAudioProcessor()
                        )
 #endif
 {
-    LP.init(apvts);
+    using namespace params;
+    const auto stringmap = getStringMap();
+
+
+    low_lowmid_cutoff = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::low_lowmid_cutoff)));
+
+    low_band_solo = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::low_band_solo)));
+    high_band_solo = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::high_band_solo)));
+
+    low_compressor.init(apvts);
+
 }
 
 CompressorAudioProcessor::~CompressorAudioProcessor()
@@ -102,9 +112,13 @@ void CompressorAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     spec.numChannels = getTotalNumOutputChannels();
     spec.sampleRate = sampleRate;
 
-    
-    
-    LP.prepare(spec);
+    low_Band.setType(juce::dsp::LinkwitzRileyFilterType::lowpass);
+    high_Band.setType(juce::dsp::LinkwitzRileyFilterType::highpass);
+
+    low_Band.prepare(spec);
+    high_Band.prepare(spec);
+
+    low_compressor.prepare(spec);
     
 }
 
@@ -140,6 +154,17 @@ bool CompressorAudioProcessor::isBusesLayoutSupported (const BusesLayout& layout
 }
 #endif
 
+bool anyOtherBandSoloed(std::array<bool, 2> solos)
+{
+    for (auto& solo : solos)
+    {
+        if (solo)
+            return true;
+    }
+    return false;
+}
+
+
 void CompressorAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
@@ -155,14 +180,58 @@ void CompressorAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    LP.process(buffer);
+    if (low_compressor.bypass->get())
+        return;
+
+    lowBuffer.makeCopyOf(buffer);
+    highBuffer.makeCopyOf(buffer);
+
+    juce::AudioBuffer<float> difference_buffer;
+    juce::AudioBuffer<float> copy_buffer;
+    difference_buffer.makeCopyOf(buffer);
+    copy_buffer.makeCopyOf(buffer);
+    difference_buffer.applyGain(-1);
+   
+    auto block_low = juce::dsp::AudioBlock<float>(lowBuffer);
+    auto context_low = juce::dsp::ProcessContextReplacing<float>(block_low);
+
+    auto block_high = juce::dsp::AudioBlock<float>(highBuffer);
+    auto context_high = juce::dsp::ProcessContextReplacing<float>(block_high);
+
+    low_Band.setCutoffFrequency(low_lowmid_cutoff->get());
+    high_Band.setCutoffFrequency(low_lowmid_cutoff->get());
     
+    low_Band.process(context_low);
+    high_Band.process(context_high);
 
+    int n = buffer.getNumSamples();
+    int channel_n = buffer.getNumChannels();
 
+    std::array<bool, 2> solos = { low_band_solo->get(), high_band_solo->get() };
 
-    
-  
+    std::array<juce::AudioBuffer<float>, 2> buffers = { lowBuffer, highBuffer };
+
+    buffer.clear();
+    for (int i = 0; i < channel_n; i++)
+    {
+        for (int j = 0; j < buffers.size(); j++)
+        {
+            if(solos[j] || !anyOtherBandSoloed(solos))
+            buffer.addFrom(i, 0, buffers[j], i, 0, n);
+
+        }
+       /* buffer.addFrom(i, 0, lowBuffer, i, 0, n);
+        buffer.addFrom(i, 0, highBuffer, i, 0, n);*/
+        
+        //buffer.addFrom(i, 0, difference_buffer, i, 0, n);
+    }
+
+    DBG("buffer Sample: " << buffer.getSample(0, 5));
+    DBG("Differnce Sample: " << difference_buffer.getSample(0, 5));
+    DBG("");
+   
 }
+
 
 //==============================================================================
 bool CompressorAudioProcessor::hasEditor() const
@@ -197,56 +266,73 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
     APVTS::ParameterLayout layout;
 
     using namespace juce;
+    const auto stringmap = params::getStringMap();
+
+    using namespace params;
 
     layout.add(std::make_unique<AudioParameterFloat>(
-        "Threshold",
-        "Threshold",
+        stringmap.at(Params::low_band_threshold),
+        stringmap.at(Params::low_band_threshold),
         NormalisableRange<float>(-60, 12, 1, 1),
         0));
 
     layout.add(std::make_unique<AudioParameterFloat>(
-        "Attack",
-        "Attack",
-        NormalisableRange<float>(5, 500, 1, 1),
-        5));
-
-    layout.add(std::make_unique<AudioParameterFloat>(
-        "Release",
-        "Release",
-        NormalisableRange<float>(5, 500, 1, 1),
-        200));
-
-    layout.add(std::make_unique<AudioParameterFloat>(
-        "Ratio",
-        "Ratio",
+        stringmap.at(Params::low_band_ratio),
+        stringmap.at(Params::low_band_ratio),
         NormalisableRange<float>(1, 100, 0.5, 0.2),
         4));
 
     layout.add(std::make_unique<AudioParameterFloat>(
-        "Makeup",
-        "Makeup Gain",
+        stringmap.at(Params::low_band_attack),
+              stringmap.at(Params::low_band_attack),
+              NormalisableRange<float>(5, 500, 1, 1),
+        5));
+
+    layout.add(std::make_unique<AudioParameterFloat>(
+        stringmap.at(Params::low_band_release),
+              stringmap.at(Params::low_band_release),
+        NormalisableRange<float>(5, 500, 1, 1),
+        200));
+
+    layout.add(std::make_unique<AudioParameterFloat>(
+        stringmap.at(Params::low_band_makeup),
+        stringmap.at(Params::low_band_makeup),
         NormalisableRange<float>(-120, 12, 0.5, 5),
         1));
 
     layout.add(std::make_unique<AudioParameterBool>(
-        "Bypass",
-        "Bypass",
+        stringmap.at(Params::low_band_bypass),
+        stringmap.at(Params::low_band_bypass),
         false
     ));
 
     layout.add(std::make_unique<AudioParameterChoice>(
-        "RCMode",
-        "RC Mode",
+        stringmap.at(Params::low_band_RCmode),
+        stringmap.at(Params::low_band_RCmode),
         juce::StringArray("Normal RC", "Procentual RC", "Level RC"),
         0
     ));
 
     layout.add(std::make_unique<AudioParameterFloat>(
-        "CutoffFrequency",
-        "CutoffFrequency",
+        stringmap.at(Params::low_lowmid_cutoff),
+        stringmap.at(Params::low_lowmid_cutoff),
         NormalisableRange<float>(20, 20000, 1, 1),
         200
     ));
+
+    layout.add(std::make_unique<AudioParameterBool>(
+        stringmap.at(Params::low_band_solo),
+        stringmap.at(Params::low_band_solo),
+        false
+    ));
+
+    layout.add(std::make_unique<AudioParameterBool>(
+        stringmap.at(Params::high_band_solo),
+        stringmap.at(Params::high_band_solo),
+        false
+    ));
+
+
 
     return layout;
 }

@@ -15,6 +15,101 @@
 /**
 */
 
+namespace params {
+    enum Params
+    {
+        low_band_threshold,
+        low_band_ratio,
+        low_band_attack,
+        low_band_release,
+        low_band_makeup,
+        low_band_bypass,
+        low_band_solo,
+        low_band_RCmode,
+
+
+        lowmid_band_threshold,
+        lowmid_band_ratio,
+        lowmid_band_attack,
+        lowmid_band_release,
+        lowmid_band_makeup,
+        lowmid_band_bypass,
+        lowmid_band_solo,
+        lowmid_band_RCmode,
+
+        highmid_band_threshold,
+        highmid_band_ratio,
+        highmid_band_attack,
+        highmid_band_release,
+        highmid_band_makeup,
+        highmid_band_bypass,
+        highmid_band_solo,
+        highmid_band_RCmode,
+
+        high_band_threshold,
+        high_band_ratio,
+        high_band_attack,
+        high_band_release,
+        high_band_makeup,
+        high_band_bypass,
+        high_band_solo,
+        high_band_RCmode,
+
+        low_lowmid_cutoff,
+        lowmid_highmid_cutoff,
+        highmid_high_cutoff,
+    };
+
+    const std::map<Params, juce::String> getStringMap()
+    {
+        const std::map<Params, juce::String> map = 
+        {
+            {low_band_threshold, "Lowband Threshold"},
+            {low_band_ratio, "Lowband Ratio"},
+            {low_band_attack, "Lowband Attack"},
+            {low_band_release, "Lowband Release"},
+            {low_band_makeup, "Lowband Gain"},
+            {low_band_bypass, "Lowband Bypass"},
+            {low_band_solo, "Lowband Solo"},
+            {low_band_RCmode, "Lowband RCMode"},
+
+            {lowmid_band_threshold, "Low-Midband Threshold"},
+            {lowmid_band_ratio, "Low-Midband Ratio"},
+            {lowmid_band_attack, "Low-Midband Attack"},
+            {lowmid_band_release, "Low-Midband Release"},
+            {lowmid_band_makeup, "Low-Midband Gain"},
+            {lowmid_band_bypass, "Low-Midband Bypass"},
+            {lowmid_band_solo, "Low-Midband Solo"},
+            {lowmid_band_RCmode, "Low-Midband RCMode"},
+            
+            {highmid_band_threshold, "High-Midband Threshold"},
+            {highmid_band_ratio, "High-Midband Ratio"},
+            {highmid_band_attack, "High-Midband Attack"},
+            {highmid_band_release, "High-Midband Release"},
+            {highmid_band_makeup, "High-Midband Gain"},
+            {highmid_band_bypass, "High-Midband Bypass"},
+            {highmid_band_solo, "High-Midband Solo"},
+            {highmid_band_RCmode, "High-Midband RCMode"},
+           
+            {high_band_threshold, "Highband Threshold"},
+            {high_band_ratio, "Highband Ratio"},
+            {high_band_attack, "Highband Attack"},
+            {high_band_release, "Highband Release"},
+            {high_band_makeup, "Highband Gain"},
+            {high_band_bypass, "Highband Bypass"},
+            {high_band_solo, "Highband Solo"},
+            {high_band_RCmode, "Highband RCMode"},
+            
+            {low_lowmid_cutoff, "Low-Lowmid-Cutoff"},
+            {lowmid_highmid_cutoff, "Lowmid-Highmid-Cutoff"},
+            {highmid_high_cutoff, "Highmid-High-Cutoff"},
+        };
+
+        return map;
+    }
+}
+
+
 class Compressorband
 {
     public:
@@ -26,29 +121,28 @@ class Compressorband
         juce::AudioParameterBool* bypass{ nullptr };
         juce::AudioParameterChoice* RCMode{ nullptr };
 
-        juce::AudioParameterFloat* cutoffFrequency{ nullptr };
-
         MyCompressor<float> compressor;
-        juce::dsp::LinkwitzRileyFilter<float> filter;
 
         void init(juce::AudioProcessorValueTreeState& apvts)
         {
-            attack = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Attack"));
+            auto stringmap = params::getStringMap();
+            using namespace params;
+
+            attack = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::low_band_attack)));
             jassert(attack != nullptr);
-            release = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Release"));
+            release = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::low_band_release)));
             jassert(release != nullptr);
-            threshold = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Threshold"));
+            threshold = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::low_band_threshold)));
             jassert(threshold != nullptr);
-            ratio = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Ratio"));
+            ratio = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::low_band_ratio)));
             jassert(ratio != nullptr);
-            makeup = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("Makeup"));
+            makeup = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::low_band_makeup)));
             jassert(makeup != nullptr);
-            bypass = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter("Bypass"));
+            bypass = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::low_band_bypass)));
             jassert(bypass != nullptr);
-            RCMode = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter("RCMode"));
+            RCMode = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter(stringmap.at(Params::low_band_RCmode)));
             jassert(RCMode != nullptr);
 
-            cutoffFrequency = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter("CutoffFrequency"));
         }
     
         void updateCompressorSettings() 
@@ -61,22 +155,17 @@ class Compressorband
             compressor.setRCMode(RCMode->getIndex());
         }
 
-        void UpdateFilterSettings()
-        {
-            filter.setCutoffFrequency(cutoffFrequency->get());
-        }
+        
 
         void prepare(const juce::dsp::ProcessSpec& spec)
         {
             compressor.prepare(spec);
-            filter.prepare(spec);
         }
 
 
         void process(juce::AudioBuffer<float>& buffer)
         {
             updateCompressorSettings();
-            UpdateFilterSettings();
             auto block = juce::dsp::AudioBlock<float>(buffer);
             auto context = juce::dsp::ProcessContextReplacing<float>(block);
 
@@ -86,18 +175,6 @@ class Compressorband
             //DBG(RCMode->getParameterIndex());
 
             compressor.process(context);
-            filter.process(context);
-        }
-
-        Compressorband()
-        {
-    
-        }
-
-        Compressorband(juce::dsp::LinkwitzRileyFilterType filtertyp)
-        {
-            filter.setType(filtertyp);
-            
         }
 };
 
@@ -150,7 +227,18 @@ public:
     APVTS apvts{ *this, nullptr, "Parameters", createParameterLayout() };
 private:
     //MyCompressor<float> compressor;
-    Compressorband LP{ juce::dsp::LinkwitzRileyFilterType::lowpass };
+    Compressorband low_compressor, lowmid_compressor, highmid_compressor, high_compressor;
+    juce::dsp::LinkwitzRileyFilter<float> low_Band, lowmid_Band, highmid_Band, high_Band;
+
+
+    juce::AudioParameterFloat* low_lowmid_cutoff{ nullptr };
+    juce::AudioParameterFloat* lowmid_highmid_cutoff{ nullptr };
+    juce::AudioParameterFloat* highmid_high_cutoff{ nullptr };
+
+    juce::AudioParameterBool* low_band_solo{ nullptr };
+    juce::AudioParameterBool* high_band_solo{ nullptr };
+
+    juce::AudioBuffer<float> lowBuffer, lowmidBuffer, lowhighBuffer, highBuffer;
     
 
     

@@ -126,7 +126,6 @@ SampleType MyCompressor<SampleType>::processSample(int channel, SampleType input
 
 template <typename SampleType>
 void MyCompressor<SampleType>::setRCMode(int mode) {
-    DBG(mode);
     envelopeFilter.setTC(mode);
 }
 
