@@ -23,7 +23,7 @@ CompressorAudioProcessor::CompressorAudioProcessor()
 #endif
 {
     using namespace params;
-    const auto stringmap = getStringMap();
+    const auto& stringmap = getStringMap();
 
 
     low_lowmid_cutoff = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::           low_lowmid_cutoff)));
@@ -349,8 +349,8 @@ bool CompressorAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* CompressorAudioProcessor::createEditor()
 {
-    //return new CompressorAudioProcessorEditor (*this);
-    return new juce::GenericAudioProcessorEditor(*this);
+    return new CompressorAudioProcessorEditor (*this);
+    //return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
@@ -374,7 +374,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
     APVTS::ParameterLayout layout;
 
     using namespace juce;
-    const auto stringmap = params::getStringMap();
+    const auto& stringmap = params::getStringMap();
 
     using namespace params;
 
@@ -570,15 +570,15 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
     layout.add(std::make_unique<AudioParameterFloat>(
         stringmap.at(Params::lowmid_highmid_cutoff),
         stringmap.at(Params::lowmid_highmid_cutoff),
-        NormalisableRange<float>(999, 3999, 1, 0.2),
-        200
+        NormalisableRange<float>(1000, 3999, 1, 0.2),
+        2000
     ));
 
     layout.add(std::make_unique<AudioParameterFloat>(
         stringmap.at(Params::highmid_high_cutoff),
         stringmap.at(Params::highmid_high_cutoff),
         NormalisableRange<float>(4000, 20000, 1, 0.2),
-        200
+        6000
     ));
 
     

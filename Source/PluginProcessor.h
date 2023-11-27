@@ -60,7 +60,7 @@ namespace params {
         highmid_high_cutoff,
     };
 
-    const std::map<Params, juce::String> getStringMap()
+    static const std::map<Params, juce::String> getStringMap()
     {
         const std::map<Params, juce::String> map = 
         {
