@@ -26,18 +26,47 @@ CompressorAudioProcessor::CompressorAudioProcessor()
     const auto stringmap = getStringMap();
 
 
-    low_lowmid_cutoff = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::low_lowmid_cutoff)));
-    lowmid_highmid_cutoff = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::lowmid_highmid_cutoff)));
-    highmid_high_cutoff = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::highmid_high_cutoff)));
+    low_lowmid_cutoff = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::           low_lowmid_cutoff)));
+    lowmid_highmid_cutoff = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::       lowmid_highmid_cutoff)));
+    highmid_high_cutoff = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::         highmid_high_cutoff)));
 
-    low_band_solo = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::low_band_solo)));
-    lowmid_band_solo = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::lowmid_band_solo)));
-    highmid_band_solo = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::highmid_band_solo)));
-    high_band_solo = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::high_band_solo)));
+    low_band_solo = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::                low_band_solo)));
+    lowmid_band_solo = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::             lowmid_band_solo)));
+    highmid_band_solo = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::            highmid_band_solo)));
+    high_band_solo = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::               high_band_solo)));
 
 
-    low_compressor.init(apvts);
+    low_compressor.attack = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::       low_band_attack)));
+    low_compressor.release = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::      low_band_release)));
+    low_compressor.threshold = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::    low_band_threshold)));
+    low_compressor.ratio = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::        low_band_ratio)));
+    low_compressor.makeup = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::       low_band_makeup)));
+    low_compressor.bypass = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::        low_band_bypass)));
+    low_compressor.RCMode = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter(stringmap.at(Params::      low_band_RCmode)));
 
+    lowmid_compressor.attack =  dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::   lowmid_band_attack)));
+    lowmid_compressor.release = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::   lowmid_band_release)));
+    lowmid_compressor.threshold = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params:: lowmid_band_threshold)));
+    lowmid_compressor.ratio = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::     lowmid_band_ratio)));
+    lowmid_compressor.makeup = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::    lowmid_band_makeup)));
+    lowmid_compressor.bypass = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::     lowmid_band_bypass)));
+    lowmid_compressor.RCMode = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter(stringmap.at(Params::   lowmid_band_RCmode)));
+
+    highmid_compressor.attack = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::   highmid_band_attack)));
+    highmid_compressor.release = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::  highmid_band_release)));
+    highmid_compressor.threshold = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::highmid_band_threshold)));
+    highmid_compressor.ratio = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::    highmid_band_ratio)));
+    highmid_compressor.makeup = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::   highmid_band_makeup)));
+    highmid_compressor.bypass = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::    highmid_band_bypass)));
+    highmid_compressor.RCMode = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter(stringmap.at(Params::  highmid_band_RCmode)));
+
+    high_compressor.attack = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::      high_band_attack)));
+    high_compressor.release = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::     high_band_release)));
+    high_compressor.threshold = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::   high_band_threshold)));
+    high_compressor.ratio = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::       high_band_ratio)));
+    high_compressor.makeup = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::      high_band_makeup)));
+    high_compressor.bypass = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::       high_band_bypass)));
+    high_compressor.RCMode = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter(stringmap.at(Params::     high_band_RCmode)));
 }
 
 CompressorAudioProcessor::~CompressorAudioProcessor()
@@ -150,7 +179,9 @@ void CompressorAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     invertedAP2.prepare(spec);
     invertedAP3.prepare(spec);
 
-    low_compressor.prepare(spec);
+    for (auto & compressor : compressors) {
+        compressor.prepare(spec);
+    }
     
 }
 
@@ -226,6 +257,8 @@ void CompressorAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     auto context1 = juce::dsp::ProcessContextReplacing<float>(block1);
     auto context2 = juce::dsp::ProcessContextReplacing<float>(block2);
     auto context3 = juce::dsp::ProcessContextReplacing<float>(block3);
+
+    std::array<juce::dsp::ProcessContextReplacing<float>, 4> ctxs = { context0, context1, context2, context3 };
     
     auto cutoff_low_lowmid = low_lowmid_cutoff->get();
     auto cutoff_lowmid_highmid = lowmid_highmid_cutoff->get();
@@ -241,9 +274,8 @@ void CompressorAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     HP3.setCutoffFrequency(cutoff_lowmid_highmid);
     AP4.setCutoffFrequency(cutoff_lowmid_highmid);
 
-    invertedAP1.setCutoffFrequency(cutoff_low_lowmid);
+   /* invertedAP1.setCutoffFrequency(cutoff_low_lowmid);
     invertedAP2.setCutoffFrequency(cutoff_lowmid_highmid);
-
     invertedAP3.setCutoffFrequency(cutoff_highmid_high);
 
     invertedBuffer.makeCopyOf(buffer);
@@ -254,7 +286,7 @@ void CompressorAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     invertedAP2.process(invertedContext);
     invertedAP3.process(invertedContext);
 
-    invertedBuffer.applyGain(-1);
+    invertedBuffer.applyGain(-1);*/
 
 
 
@@ -267,31 +299,31 @@ void CompressorAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     HP1.process(context1);
 
     //create highband
-    buffers[2] = buffers[1];
-    HP2.process(context2);
-    AP4.process(context2);
+    buffers[3] = buffers[1];
+    HP2.process(context3);
+    AP4.process(context3);
 
     //create center bands
     LP2.process(context1);
 
     //create highmid band
-    buffers[3] = buffers[1];
-    HP3.process(context3);
+    buffers[2] = buffers[1];
+    HP3.process(context2);
 
     //create lowmid band
     LP3.process(context1);
+    
 
-
-   
-
-
-
-
+    for (int i = 0; i < compressors.size(); i++) 
+    {
+        compressors[i].updateCompressorSettings();
+        compressors[i].process(ctxs[i]);
+    }
 
     int n = buffer.getNumSamples();
     int channel_n = buffer.getNumChannels();
 
-    std::array<bool, 4> solos = { low_band_solo->get(), lowmid_band_solo->get(), high_band_solo->get() , highmid_band_solo->get()};
+    std::array<bool, 4> solos = { low_band_solo->get(), lowmid_band_solo->get(),  highmid_band_solo->get(), high_band_solo->get()};
 
     buffer.clear();
     for (int i = 0; i < channel_n; i++)
@@ -301,9 +333,10 @@ void CompressorAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
             buffer.addFrom(i, 0, buffers[j], i, 0, n);
     }
 
-    if (low_compressor.bypass->get())
+    //perform null test
+    /*if (low_compressor.bypass->get())
         for (int i = 0; i < channel_n; i++)
-                buffer.addFrom(i, 0, invertedBuffer, i, 0, n);
+                buffer.addFrom(i, 0, invertedBuffer, i, 0, n);*/
    
 }
 
@@ -345,6 +378,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 
     using namespace params;
 
+    //lowband
+
     layout.add(std::make_unique<AudioParameterFloat>(
         stringmap.at(Params::low_band_threshold),
         stringmap.at(Params::low_band_threshold),
@@ -372,7 +407,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
     layout.add(std::make_unique<AudioParameterFloat>(
         stringmap.at(Params::low_band_makeup),
         stringmap.at(Params::low_band_makeup),
-        NormalisableRange<float>(-120, 12, 0.5, 10),
+        NormalisableRange<float>(-120, 36, 0.5, 10),
         1));
 
     layout.add(std::make_unique<AudioParameterBool>(
@@ -384,6 +419,141 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
     layout.add(std::make_unique<AudioParameterChoice>(
         stringmap.at(Params::low_band_RCmode),
         stringmap.at(Params::low_band_RCmode),
+        juce::StringArray("Normal RC", "Procentual RC", "Level RC"),
+        0
+    ));
+
+
+    //lowmid band
+
+    layout.add(std::make_unique<AudioParameterFloat>(
+        stringmap.at(Params::lowmid_band_threshold),
+        stringmap.at(Params::lowmid_band_threshold),
+        NormalisableRange<float>(-60, 12, 1, 1),
+        0));
+
+    layout.add(std::make_unique<AudioParameterFloat>(
+        stringmap.at(Params::lowmid_band_ratio),
+        stringmap.at(Params::lowmid_band_ratio),
+        NormalisableRange<float>(1, 100, 0.5, 0.2),
+        4));
+
+    layout.add(std::make_unique<AudioParameterFloat>(
+        stringmap.at(Params::lowmid_band_attack),
+        stringmap.at(Params::lowmid_band_attack),
+        NormalisableRange<float>(5, 500, 1, 1),
+        5));
+
+    layout.add(std::make_unique<AudioParameterFloat>(
+        stringmap.at(Params::lowmid_band_release),
+        stringmap.at(Params::lowmid_band_release),
+        NormalisableRange<float>(5, 500, 1, 1),
+        200));
+
+    layout.add(std::make_unique<AudioParameterFloat>(
+        stringmap.at(Params::lowmid_band_makeup),
+        stringmap.at(Params::lowmid_band_makeup),
+        NormalisableRange<float>(-120, 36, 0.5, 10),
+        1));
+
+    layout.add(std::make_unique<AudioParameterBool>(
+        stringmap.at(Params::lowmid_band_bypass),
+        stringmap.at(Params::lowmid_band_bypass),
+        false
+    ));
+
+    layout.add(std::make_unique<AudioParameterChoice>(
+        stringmap.at(Params::lowmid_band_RCmode),
+        stringmap.at(Params::lowmid_band_RCmode),
+        juce::StringArray("Normal RC", "Procentual RC", "Level RC"),
+        0
+    ));
+
+    //highmid band
+    layout.add(std::make_unique<AudioParameterFloat>(
+        stringmap.at(Params::highmid_band_threshold),
+        stringmap.at(Params::highmid_band_threshold),
+        NormalisableRange<float>(-60, 12, 1, 1),
+        0));
+
+    layout.add(std::make_unique<AudioParameterFloat>(
+        stringmap.at(Params::highmid_band_ratio),
+        stringmap.at(Params::highmid_band_ratio),
+        NormalisableRange<float>(1, 100, 0.5, 0.2),
+        4));
+
+    layout.add(std::make_unique<AudioParameterFloat>(
+        stringmap.at(Params::highmid_band_attack),
+        stringmap.at(Params::highmid_band_attack),
+        NormalisableRange<float>(5, 500, 1, 1),
+        5));
+
+    layout.add(std::make_unique<AudioParameterFloat>(
+        stringmap.at(Params::highmid_band_release),
+        stringmap.at(Params::highmid_band_release),
+        NormalisableRange<float>(5, 500, 1, 1),
+        200));
+
+    layout.add(std::make_unique<AudioParameterFloat>(
+        stringmap.at(Params::highmid_band_makeup),
+        stringmap.at(Params::highmid_band_makeup),
+        NormalisableRange<float>(-120, 36, 0.5, 10),
+        1));
+
+    layout.add(std::make_unique<AudioParameterBool>(
+        stringmap.at(Params::highmid_band_bypass),
+        stringmap.at(Params::highmid_band_bypass),
+        false
+    ));
+
+    layout.add(std::make_unique<AudioParameterChoice>(
+        stringmap.at(Params::highmid_band_RCmode),
+        stringmap.at(Params::highmid_band_RCmode),
+        juce::StringArray("Normal RC", "Procentual RC", "Level RC"),
+        0
+    ));
+
+    //high band
+
+    layout.add(std::make_unique<AudioParameterFloat>(
+        stringmap.at(Params::high_band_threshold),
+        stringmap.at(Params::high_band_threshold),
+        NormalisableRange<float>(-60, 12, 1, 1),
+        0));
+
+    layout.add(std::make_unique<AudioParameterFloat>(
+        stringmap.at(Params::high_band_ratio),
+        stringmap.at(Params::high_band_ratio),
+        NormalisableRange<float>(1, 100, 0.5, 0.2),
+        4));
+
+    layout.add(std::make_unique<AudioParameterFloat>(
+        stringmap.at(Params::high_band_attack),
+        stringmap.at(Params::high_band_attack),
+        NormalisableRange<float>(5, 500, 1, 1),
+        5));
+
+    layout.add(std::make_unique<AudioParameterFloat>(
+        stringmap.at(Params::high_band_release),
+        stringmap.at(Params::high_band_release),
+        NormalisableRange<float>(5, 500, 1, 1),
+        200));
+
+    layout.add(std::make_unique<AudioParameterFloat>(
+        stringmap.at(Params::high_band_makeup),
+        stringmap.at(Params::high_band_makeup),
+        NormalisableRange<float>(-120, 36, 0.5, 10),
+        1));
+
+    layout.add(std::make_unique<AudioParameterBool>(
+        stringmap.at(Params::high_band_bypass),
+        stringmap.at(Params::high_band_bypass),
+        false
+    ));
+
+    layout.add(std::make_unique<AudioParameterChoice>(
+        stringmap.at(Params::high_band_RCmode),
+        stringmap.at(Params::high_band_RCmode),
         juce::StringArray("Normal RC", "Procentual RC", "Level RC"),
         0
     ));

@@ -122,28 +122,6 @@ class Compressorband
         juce::AudioParameterChoice* RCMode{ nullptr };
 
         MyCompressor<float> compressor;
-
-        void init(juce::AudioProcessorValueTreeState& apvts)
-        {
-            auto stringmap = params::getStringMap();
-            using namespace params;
-
-            attack = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::low_band_attack)));
-            jassert(attack != nullptr);
-            release = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::low_band_release)));
-            jassert(release != nullptr);
-            threshold = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::low_band_threshold)));
-            jassert(threshold != nullptr);
-            ratio = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::low_band_ratio)));
-            jassert(ratio != nullptr);
-            makeup = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::low_band_makeup)));
-            jassert(makeup != nullptr);
-            bypass = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::low_band_bypass)));
-            jassert(bypass != nullptr);
-            RCMode = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter(stringmap.at(Params::low_band_RCmode)));
-            jassert(RCMode != nullptr);
-
-        }
     
         void updateCompressorSettings() 
         {
@@ -155,25 +133,16 @@ class Compressorband
             compressor.setRCMode(RCMode->getIndex());
         }
 
-        
-
         void prepare(const juce::dsp::ProcessSpec& spec)
         {
             compressor.prepare(spec);
         }
 
 
-        void process(juce::AudioBuffer<float>& buffer)
+        void process(juce::dsp::ProcessContextReplacing<float>& context)
         {
-            updateCompressorSettings();
-            auto block = juce::dsp::AudioBlock<float>(buffer);
-            auto context = juce::dsp::ProcessContextReplacing<float>(block);
-
             if (bypass->get())
                 context.isBypassed = true;
-
-            //DBG(RCMode->getParameterIndex());
-
             compressor.process(context);
         }
 };
@@ -227,7 +196,13 @@ public:
     APVTS apvts{ *this, nullptr, "Parameters", createParameterLayout() };
 private:
     //MyCompressor<float> compressor;
-    Compressorband low_compressor, lowmid_compressor, highmid_compressor, high_compressor;
+    std::array<Compressorband, 4> compressors;
+
+    Compressorband& low_compressor = compressors[0];
+    Compressorband& lowmid_compressor = compressors[1];
+    Compressorband& highmid_compressor = compressors[2];
+    Compressorband& high_compressor = compressors[3];
+
     juce::dsp::LinkwitzRileyFilter<float> LP1, AP2, AP3,
                                           HP1, LP2, LP3,
                                                     HP3,
