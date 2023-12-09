@@ -19,11 +19,21 @@ CompressorAudioProcessorEditor::CompressorAudioProcessorEditor (CompressorAudioP
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    addAndMakeVisible(cc);
+    addAndMakeVisible(compressorControls);
+    addAndMakeVisible(filterControls);
     //addAndMakeVisible(BandControls);
     //slider.setSliderStyle(Slider::SliderStyle::Rotary);
     //addAndMakeVisible(slider);
-    setSize (1000, 1000);
+    setSize (1500, 1000);
+    
+
+
+
+
+
+
+    getLookAndFeel().setColour(Label::ColourIds::textColourId, juce::Colours::black);
+
 }
 
 CompressorAudioProcessorEditor::~CompressorAudioProcessorEditor()
@@ -45,10 +55,6 @@ void CompressorAudioProcessorEditor::paint (juce::Graphics& g)
 void CompressorAudioProcessorEditor::resized()
 {
     auto& bounds = getBounds();
-    cc.setBounds(bounds.removeFromTop(getHeight()/1.5));
-    //slider.setBounds(bounds.removeFromLeft(200));
-    //cc.setBounds(bounds.removeFromTop(300));
-    //BandControls.setBounds(bounds);
-    // This is generally where you'll want to lay out the positions of any
-    // subcomponents in your editor..
+    compressorControls.setBounds(bounds.removeFromTop(getHeight()/1.5));
+    filterControls.setBounds(bounds);
 }

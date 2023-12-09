@@ -407,7 +407,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
     layout.add(std::make_unique<AudioParameterFloat>(
         stringmap.at(Params::low_band_makeup),
         stringmap.at(Params::low_band_makeup),
-        NormalisableRange<float>(-120, 36, 0.5, 10),
+        NormalisableRange<float>(-120, 36, 0.5, 2.7),
         1));
 
     layout.add(std::make_unique<AudioParameterBool>(
@@ -453,7 +453,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
     layout.add(std::make_unique<AudioParameterFloat>(
         stringmap.at(Params::lowmid_band_makeup),
         stringmap.at(Params::lowmid_band_makeup),
-        NormalisableRange<float>(-120, 36, 0.5, 10),
+        NormalisableRange<float>(-120, 36, 0.5, 2.7),
         1));
 
     layout.add(std::make_unique<AudioParameterBool>(
@@ -497,7 +497,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
     layout.add(std::make_unique<AudioParameterFloat>(
         stringmap.at(Params::highmid_band_makeup),
         stringmap.at(Params::highmid_band_makeup),
-        NormalisableRange<float>(-120, 36, 0.5, 10),
+        NormalisableRange<float>(-120, 36, 0.5, 2.7),
         1));
 
     layout.add(std::make_unique<AudioParameterBool>(
@@ -542,7 +542,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
     layout.add(std::make_unique<AudioParameterFloat>(
         stringmap.at(Params::high_band_makeup),
         stringmap.at(Params::high_band_makeup),
-        NormalisableRange<float>(-120, 36, 0.5, 10),
+        NormalisableRange<float>(-120, 36, 0.5, 2.7),
         1));
 
     layout.add(std::make_unique<AudioParameterBool>(
