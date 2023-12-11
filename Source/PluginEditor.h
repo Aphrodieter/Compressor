@@ -23,6 +23,7 @@ public:
         setColour(Slider::ColourIds::rotarySliderFillColourId, color);
         setColour(Slider::ColourIds::textBoxOutlineColourId, juce::Colours::darkolivegreen);
 
+        setColour(Slider::ColourIds::thumbColourId, juce::Colours::black);
         setColour(Slider::ColourIds::textBoxTextColourId, juce::Colours::black);
         setColour(ToggleButton::ColourIds::textColourId, juce::Colours::black);
         setColour(ToggleButton::ColourIds::tickColourId, juce::Colours::black);
@@ -34,6 +35,9 @@ public:
         setColour(ComboBox::ColourIds::textColourId, juce::Colours::black);
         setColour(ComboBox::ColourIds::arrowColourId, juce::Colours::black);
         setColour(ComboBox::ColourIds::backgroundColourId, juce::Colours::burlywood);
+        setColour(ComboBox::ColourIds::focusedOutlineColourId, juce::Colours::burlywood);
+
+
         setColour(ComboBox::ColourIds::outlineColourId, juce::Colours::darkolivegreen);
 
 
@@ -250,6 +254,11 @@ public:
         addAndMakeVisible(control_area_text);
 
 
+        addAndMakeVisible(filterBorder);
+        filterBorder.setText("Filter");
+        filterBorder.setTextLabelPosition(Justification::centredTop);
+
+
     }
 
     void paint(Graphics& g) override
@@ -272,12 +281,16 @@ public:
 
         for (auto& slider: sliders)
         {
-            flexbox.items.add(FlexItem(slider).withWidth(bounds.getWidth()/3).withHeight(bounds.getHeight()/3));
+            auto item = FlexItem(slider);
+            flexbox.items.add(item.withWidth(bounds.getWidth()/3).withHeight(bounds.getHeight()/3));
         }
 
+
         flexbox.performLayout(getLocalBounds());
+        //filterBorder.setBounds(flexbox.items.getLast().currentBounds.toNearestInt().expanded(0,10).withTrimmedRight(10));
+
         auto width = 200;
-        auto height = 200;
+        auto height = 20;
         control_area_text.setBounds(getWidth() / 2 - width/2 , getHeight() / 6, width, height);
     }
 private:
@@ -303,9 +316,87 @@ private:
     Label control_area_text;
 
     std::array<FilterLookAndFeel, 3> lookAndFeels = { FilterLookAndFeel(juce::Colours::darkblue, juce::Colours::darkcyan), FilterLookAndFeel(juce::Colours::darkcyan,juce::Colours::lightcoral) ,FilterLookAndFeel(juce::Colours::lightcoral,juce::Colours::lightgoldenrodyellow) };
+    GroupComponent filterBorder;
 };
 
+using namespace juce;
+class WaveshaperGUI : public Component
+{
+    public:
+        class Point : public Component
+        {
+            public:
+                Point(int _x, int _y)
+                {
+                    x = _x;
+                    y = _y;
+                }
+                void paint(Graphics& g) override
+                {
+                    g.setColour(juce::Colours::orange);
+                    g.fillEllipse(getLocalBounds().toFloat());
+                }
+                int getX()
+                {
+                    return x;
+                }
+                int getY()
+                {
+                    return y;
+                }
+            private:
+                int x, y;
+        };
 
+        WaveshaperGUI() 
+        {
+        }
+        void paint(Graphics& g) override
+        {
+            auto bounds = getLocalBounds();
+            g.setColour(juce::Colours::black);
+            g.fillRoundedRectangle(bounds.toFloat(), 5);
+            g.setColour(juce::Colours::orange);
+            g.drawLine(bounds.getBottomLeft().getX(), bounds.getBottomLeft().getY(), bounds.getTopRight().getX(), bounds.getTopRight().getY());
+        }
+        void resized() override
+        {
+
+        }
+        void mouseDoubleClick(const MouseEvent& event) override
+        {
+            int mouse_x = event.getMouseDownX();
+            int mouse_y = event.getMouseDownY();
+            int point_x = mouse_x;
+            int point_y = mouse_y;
+
+            if (points.size() > 0) {
+                Point* lastPoint = points[points.size() - 1];
+                point_x = std::max(lastPoint->getX(), mouse_x);
+            }
+            Point* newPoint = new Point(point_x,point_y);
+
+            newPoint->setBounds(point_x, point_y, pointSize, pointSize);
+            addAndMakeVisible(newPoint);
+
+            points.push_back(newPoint);
+
+
+        }
+
+        void addPoint()
+        {
+
+        }
+       
+
+
+
+    private:
+        std::vector<Point*> points;
+        Point point{10,10};
+        static constexpr int pointSize = 10;
+};
 
 class CompressorAudioProcessorEditor  : public juce::AudioProcessorEditor
 {
@@ -321,8 +412,9 @@ private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     CompressorAudioProcessor& audioProcessor;
-    CompressorControls compressorControls{juce::Colours::burlywood, audioProcessor.apvts};
-    FilterControls filterControls{ juce::Colours::darkolivegreen, audioProcessor.apvts };
+    //CompressorControls compressorControls{juce::Colours::burlywood, audioProcessor.apvts};
+    //FilterControls filterControls{ juce::Colours::darkolivegreen, audioProcessor.apvts };
+    WaveshaperGUI waveshaperGui;
     
     
     

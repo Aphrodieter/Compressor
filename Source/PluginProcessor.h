@@ -190,6 +190,9 @@ public:
     void getStateInformation(juce::MemoryBlock& destData) override;
     void setStateInformation(const void* data, int sizeInBytes) override;
 
+    float waveshaperFunction(float input_value);
+
+
     using APVTS = juce::AudioProcessorValueTreeState;
     APVTS::ParameterLayout createParameterLayout();
 
@@ -222,7 +225,10 @@ private:
 
     juce::AudioBuffer<float> invertedBuffer;
     std::array<juce::AudioBuffer<float>, 4> buffers;
-    
+
+    juce::dsp::WaveShaper<float, std::function<float(float)>> waveshaper;
+    std::array<float, 512> waveshaperMap{ 0.0f };
+    size_t mapSize = (size_t)(sizeof(waveshaperMap) / sizeof(waveshaperMap[0]));
 
     
 

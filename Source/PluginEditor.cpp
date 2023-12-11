@@ -12,27 +12,27 @@
 
 
 
-
 //==============================================================================
 CompressorAudioProcessorEditor::CompressorAudioProcessorEditor (CompressorAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    addAndMakeVisible(compressorControls);
-    addAndMakeVisible(filterControls);
+    //addAndMakeVisible(compressorControls);
+    //addAndMakeVisible(filterControls);
+    addAndMakeVisible(waveshaperGui);
     //addAndMakeVisible(BandControls);
     //slider.setSliderStyle(Slider::SliderStyle::Rotary);
     //addAndMakeVisible(slider);
-    setSize (1500, 1000);
-    
+    //setSize (1500, 1000);
+    setSize(800, 800);
+    //setResizable(true, true);
 
 
 
 
 
-
-    getLookAndFeel().setColour(Label::ColourIds::textColourId, juce::Colours::black);
+    //getLookAndFeel().setColour(Label::ColourIds::textColourId, juce::Colours::black);
 
 }
 
@@ -55,6 +55,7 @@ void CompressorAudioProcessorEditor::paint (juce::Graphics& g)
 void CompressorAudioProcessorEditor::resized()
 {
     auto& bounds = getBounds();
-    compressorControls.setBounds(bounds.removeFromTop(getHeight()/1.5));
-    filterControls.setBounds(bounds);
+    //compressorControls.setBounds(bounds.removeFromTop(getHeight()/1.5));
+    //filterControls.setBounds(bounds);
+    waveshaperGui.setBounds(bounds);
 }

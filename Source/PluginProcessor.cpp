@@ -10,6 +10,21 @@
 #include "PluginEditor.h"
 
 //==============================================================================
+
+
+template <typename T>
+std::vector<T> linspace(T a, T b, size_t N) {
+    T h = (b - a) / static_cast<T>(N - 1);
+    std::array<float, N> xs;
+    auto val = a;
+    for (int i = 0; i < xs.size(); i++)
+    {
+        xs[i] = val;
+        val += a;
+    }
+    return xs;
+}
+
 CompressorAudioProcessor::CompressorAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
      : AudioProcessor (BusesProperties()
@@ -67,6 +82,27 @@ CompressorAudioProcessor::CompressorAudioProcessor()
     high_compressor.makeup = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::      high_band_makeup)));
     high_compressor.bypass = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::       high_band_bypass)));
     high_compressor.RCMode = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter(stringmap.at(Params::     high_band_RCmode)));
+
+    auto interval_value = (float)1 / mapSize*2;
+
+    auto val = -1.0f;
+    for (int i = 0; i < waveshaperMap.size(); i++) {
+        waveshaperMap[i] = val;
+        val += interval_value;
+        DBG("waveshapervalue: " << val);
+
+        DBG("waveshapervalue: " << waveshaperMap[i]);
+    }
+    waveshaper.functionToUse = [&](float input_value) {
+        input_value = std::abs(input_value);
+        auto map_index = (size_t)floor(input_value * mapSize);
+        auto clipped_index = std::min(mapSize-1, map_index);
+        return waveshaperMap[clipped_index];
+        };
+}
+
+float CompressorAudioProcessor::waveshaperFunction(float input_value) {
+    return static_cast<float>(1.0f);//waveshaperMap[floor(input_value * mapSize)];
 }
 
 CompressorAudioProcessor::~CompressorAudioProcessor()
@@ -182,6 +218,8 @@ void CompressorAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     for (auto & compressor : compressors) {
         compressor.prepare(spec);
     }
+
+    waveshaper.prepare(spec);
     
 }
 
@@ -332,6 +370,12 @@ void CompressorAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
             if(solos[j] || !anyOtherBandSoloed(solos))
             buffer.addFrom(i, 0, buffers[j], i, 0, n);
     }
+
+    auto block = juce::dsp::AudioBlock<float>(buffer);
+    auto context = juce::dsp::ProcessContextReplacing<float>(block);
+
+
+    //waveshaper.process(context);
 
     //perform null test
     /*if (low_compressor.bypass->get())
@@ -563,21 +607,21 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
     layout.add(std::make_unique<AudioParameterFloat>(
         stringmap.at(Params::low_lowmid_cutoff),
         stringmap.at(Params::low_lowmid_cutoff),
-        NormalisableRange<float>(20, 999, 1, 0.2),
+        NormalisableRange<float>(20, 999, 1, 1),
         200
     ));
 
     layout.add(std::make_unique<AudioParameterFloat>(
         stringmap.at(Params::lowmid_highmid_cutoff),
         stringmap.at(Params::lowmid_highmid_cutoff),
-        NormalisableRange<float>(1000, 3999, 1, 0.2),
+        NormalisableRange<float>(1000, 3999, 1, 0.5),
         2000
     ));
 
     layout.add(std::make_unique<AudioParameterFloat>(
         stringmap.at(Params::highmid_high_cutoff),
         stringmap.at(Params::highmid_high_cutoff),
-        NormalisableRange<float>(4000, 20000, 1, 0.2),
+        NormalisableRange<float>(4000, 20000, 1, 1),
         6000
     ));
 
