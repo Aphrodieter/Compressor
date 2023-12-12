@@ -337,12 +337,27 @@ class WaveshaperGUI : public Component
                 }
                 void mouseDown(const MouseEvent& event) override
                 {
-                    auto& lastPoint = parent.points[parent.points.size() - 1];
-                   /*     auto newBounds = Rectangle<int>(juce::Point<int>(lastPoint->getX(), getBoundsInParent().getBottom()),
-                                                                        getBoundsInParent().getTopRight());
-                       constrainer.setBoundsForComponent(this, newBounds, false, false, false, false);*/
+
+                    int thisPosition = getThisPositionInVector(parent.points, this);
+                    int lastPosition = thisPosition - 1;
+                    int lastPointX = lastPosition == -1 ? 0 : parent.points[lastPosition]->getX();
+
+                    int nextPosition = thisPosition + 1;
+                    int nextPointX = nextPosition == parent.points.size() ? parent.getBounds().getWidth() : parent.points[nextPosition]->getX();
+                    DBG("last point x: " << lastPointX);
+                    DBG("next point x: " << nextPointX);
+                    auto newBounds = Rectangle<int>(lastPointX, parent.getBounds().getHeight(), nextPointX - lastPointX, parent.getBounds().getHeight());
+                    constrainer.checkBounds(getBounds(), getBounds(), newBounds, false,false,false,false);
                     dragger.startDraggingComponent(this, event);
                 }
+
+                int getThisPositionInVector(std::vector<Point*>& points, Point* thisPoint)
+                {
+                    std::vector<Point*>::iterator it;
+                    it = std::find(points.begin(), points.end(), thisPoint);
+                    return it - points.begin();
+                }
+
                 void mouseDrag(const MouseEvent& event) override
                 {
                     
@@ -403,21 +418,23 @@ class WaveshaperGUI : public Component
         void mouseDoubleClick(const MouseEvent& event) override
         {
             auto bounds = getBounds();
-            int mouse_x = event.getMouseDownX();
-            int mouse_y = event.getMouseDownY();
-            int point_x = mouse_x;
-            int point_y = mouse_y;
+            int point_x = event.getMouseDownX();
+            int point_y = event.getMouseDownY();
 
-            if (points.size() > 0) {
-                Point* lastPoint = points[points.size() - 1];
-                point_x = std::max(lastPoint->getX(), mouse_x);
-            }
+           
             Point* newPoint = new Point(*this, bounds);
 
             newPoint->setBounds(point_x, point_y, pointSize, pointSize);
             addAndMakeVisible(newPoint);
 
             points.push_back(newPoint);
+
+            auto comparePoints = [](Point* p1, Point* p2)
+                {
+                    return (p1->getX() < p2->getX()); 
+                };
+            
+            std::sort(points.begin(), points.end(), comparePoints);
             
             redrawPath();
         }
@@ -428,7 +445,6 @@ class WaveshaperGUI : public Component
             path.startNewSubPath(bottomLeft);
             for (auto& point : points)
             {
-                DBG("x" << point->getX());
                 path.lineTo(point->getX(), point->getY());
             }
             path.lineTo(topRight);
