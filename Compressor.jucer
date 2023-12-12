@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="xSv9JX" name="Compressor" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" cppLanguageStandard="17"
-              companyName="TonSohn">
+              companyName="TonSohn" displaySplashScreen="1">
   <MAINGROUP id="GaHWnd" name="Compressor">
     <GROUP id="{4A1DFC7A-BEB1-705D-E428-EF12D380F41E}" name="Source">
       <FILE id="uroTfV" name="PluginProcessor.cpp" compile="1" resource="0"

@@ -340,14 +340,15 @@ class WaveshaperGUI : public Component
 
                     int thisPosition = getThisPositionInVector(parent.points, this);
                     int lastPosition = thisPosition - 1;
-                    int lastPointX = lastPosition == -1 ? 0 : parent.points[lastPosition]->getX();
+                    lastPointX = lastPosition == -1 ? 0 : parent.points[lastPosition]->getX();
 
                     int nextPosition = thisPosition + 1;
-                    int nextPointX = nextPosition == parent.points.size() ? parent.getBounds().getWidth() : parent.points[nextPosition]->getX();
+                    nextPointX = nextPosition == parent.points.size() ? parent.getBounds().getWidth() : parent.points[nextPosition]->getX();
                     DBG("last point x: " << lastPointX);
                     DBG("next point x: " << nextPointX);
-                    auto newBounds = Rectangle<int>(lastPointX, parent.getBounds().getHeight(), nextPointX - lastPointX, parent.getBounds().getHeight());
-                    constrainer.checkBounds(getBounds(), getBounds(), newBounds, false,false,false,false);
+                    auto newBounds = Rectangle<int>(lastPointX, 0, nextPointX - lastPointX, parent.getBounds().getHeight());
+                    DBG("newBounds: " << newBounds.toString());
+                    //constrainer.checkBounds(parent.getBounds(), parent.getBounds(), newBounds, false,false,false,false);
                     dragger.startDraggingComponent(this, event);
                 }
 
@@ -362,10 +363,18 @@ class WaveshaperGUI : public Component
                 {
                     
                     dragger.dragComponent(this, event, &constrainer);
+                    auto x = getX();
+                    auto y = getY();
+
+                    auto constrained_x = std::max(x, lastPointX);
+                    constrained_x = std::min(constrained_x, nextPointX);
+
+                    setCentrePosition(constrained_x, y);
                     parent.redrawPath();
                 }
                 
             private:
+                int lastPointX, nextPointX;
                 Rectangle<int>& bounds;
                 WaveshaperGUI& parent;
                 ComponentDragger dragger;
@@ -445,7 +454,7 @@ class WaveshaperGUI : public Component
             path.startNewSubPath(bottomLeft);
             for (auto& point : points)
             {
-                path.lineTo(point->getX(), point->getY());
+                path.lineTo(point->getX() + pointSize/2, point->getY() + pointSize/2);
             }
             path.lineTo(topRight);
             repaint();
