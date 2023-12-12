@@ -326,28 +326,55 @@ class WaveshaperGUI : public Component
         class Point : public Component
         {
             public:
-                Point(int _x, int _y)
+                Point(WaveshaperGUI& parent, Rectangle<int>& bounds) : parent(parent), bounds(bounds)
                 {
-                    x = _x;
-                    y = _y;
+                    constrainer.setMinimumOnscreenAmounts(pointSize, pointSize, pointSize, pointSize);
                 }
                 void paint(Graphics& g) override
                 {
                     g.setColour(juce::Colours::orange);
                     g.fillEllipse(getLocalBounds().toFloat());
                 }
-                int getX()
+                void mouseDown(const MouseEvent& event) override
                 {
-                    return x;
+                    auto& lastPoint = parent.points[parent.points.size() - 1];
+                   /*     auto newBounds = Rectangle<int>(juce::Point<int>(lastPoint->getX(), getBoundsInParent().getBottom()),
+                                                                        getBoundsInParent().getTopRight());
+                       constrainer.setBoundsForComponent(this, newBounds, false, false, false, false);*/
+                    dragger.startDraggingComponent(this, event);
                 }
-                int getY()
+                void mouseDrag(const MouseEvent& event) override
                 {
-                    return y;
+                    
+                    dragger.dragComponent(this, event, &constrainer);
+                    parent.redrawPath();
                 }
+                
             private:
+                Rectangle<int>& bounds;
+                WaveshaperGUI& parent;
+                ComponentDragger dragger;
+                ComponentBoundsConstrainer constrainer;
                 int x, y;
         };
-
+        class Line : public Component
+        {
+        public:
+            Line(int _startx, int _starty, int _endx, int _endy)
+            {
+                startx = _startx;
+                starty = _starty;
+                endx = _endx;
+                endy = _endy;
+            }
+            void paint(Graphics& g) override
+            {
+                g.setColour(juce::Colours::orange);
+                g.drawLine(startx, starty, endx, endy);
+            }
+        private:
+            int startx, starty, endx, endy;
+        };
         WaveshaperGUI() 
         {
         }
@@ -357,14 +384,25 @@ class WaveshaperGUI : public Component
             g.setColour(juce::Colours::black);
             g.fillRoundedRectangle(bounds.toFloat(), 5);
             g.setColour(juce::Colours::orange);
-            g.drawLine(bounds.getBottomLeft().getX(), bounds.getBottomLeft().getY(), bounds.getTopRight().getX(), bounds.getTopRight().getY());
+            
+            g.strokePath(path, PathStrokeType (5.0f));
         }
         void resized() override
         {
 
+            auto bounds = getLocalBounds();
+            bottomLeft = juce::Point<float>(bounds.getBottomLeft().getX(), bounds.getBottomLeft().getY());
+            topRight = juce::Point<float>(bounds.getTopRight().getX(), bounds.getTopRight().getY());
+            if (path.isEmpty())
+            {
+                path.startNewSubPath(bottomLeft);
+                path.lineTo(topRight);
+            }
+
         }
         void mouseDoubleClick(const MouseEvent& event) override
         {
+            auto bounds = getBounds();
             int mouse_x = event.getMouseDownX();
             int mouse_y = event.getMouseDownY();
             int point_x = mouse_x;
@@ -374,27 +412,37 @@ class WaveshaperGUI : public Component
                 Point* lastPoint = points[points.size() - 1];
                 point_x = std::max(lastPoint->getX(), mouse_x);
             }
-            Point* newPoint = new Point(point_x,point_y);
+            Point* newPoint = new Point(*this, bounds);
 
             newPoint->setBounds(point_x, point_y, pointSize, pointSize);
             addAndMakeVisible(newPoint);
 
             points.push_back(newPoint);
-
-
+            
+            redrawPath();
         }
 
-        void addPoint()
+        void redrawPath()
         {
-
+            path.clear();
+            path.startNewSubPath(bottomLeft);
+            for (auto& point : points)
+            {
+                DBG("x" << point->getX());
+                path.lineTo(point->getX(), point->getY());
+            }
+            path.lineTo(topRight);
+            repaint();
         }
        
 
 
 
     private:
+        juce::Point<float> bottomLeft, topRight;
         std::vector<Point*> points;
-        Point point{10,10};
+        std::vector<Line*> lines;
+        Path path;
         static constexpr int pointSize = 10;
 };
 
