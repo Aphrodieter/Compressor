@@ -17,7 +17,7 @@ class MyEnvelopeDetector
 {
 public:
     //==============================================================================
-    using LevelCalculationType = BallisticsFilterLevelCalculationType;
+    using LevelCalculationType = juce::dsp::BallisticsFilterLevelCalculationType;
 
     //==============================================================================
     /** Constructor. */

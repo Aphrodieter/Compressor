@@ -10,6 +10,7 @@
 
 #include <JuceHeader.h>
 #include "MyCompressor.h"
+#include "MyWaveshaper.h"
 
 //==============================================================================
 /**
@@ -198,7 +199,9 @@ public:
     APVTS::ParameterLayout createParameterLayout();
 
     APVTS apvts{ *this, nullptr, "Parameters", createParameterLayout() };
-    juce::dsp::WaveShaper<float, std::function<float(float)>> waveshaper;
+    static constexpr int mapSize = 1024;
+    std::array<float, mapSize> waveshaperMap{ 0.0f };
+    MyWaveShaper<float, std::function<float(float)>> waveshaper;
 
 private:
     //MyCompressor<float> compressor;
@@ -228,9 +231,6 @@ private:
 
     juce::AudioBuffer<float> invertedBuffer;
     std::array<juce::AudioBuffer<float>, 4> buffers;
-
-    std::array<float, 512> waveshaperMap{ 0.0f };
-    size_t mapSize = (size_t)(sizeof(waveshaperMap) / sizeof(waveshaperMap[0]));
 
     
 

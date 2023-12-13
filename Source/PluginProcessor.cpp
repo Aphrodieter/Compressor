@@ -92,9 +92,9 @@ CompressorAudioProcessor::CompressorAudioProcessor()
         return waveshaperMap[clipped_index];
         };*/
 
-    waveshaper.functionToUse = [](float input_value) {
+    /*waveshaper.functionToUse = [](float input_value) {
         return input_value;
-        };
+        };*/
 }
 
 
@@ -213,6 +213,15 @@ void CompressorAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
         compressor.prepare(spec);
     }
 
+    waveshaper.functionToUse = [&](float input_value) {
+        input_value = input_value * 0.5;
+        int index = std::floor(std::abs(input_value) * mapSize);
+        index = std::min(mapSize - 1, index);
+        auto output_value = waveshaperMap[index];
+        if (input_value > 0)
+            return output_value;
+        return output_value * -1;
+        };
     waveshaper.prepare(spec);
     
 }
