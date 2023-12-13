@@ -83,27 +83,21 @@ CompressorAudioProcessor::CompressorAudioProcessor()
     high_compressor.bypass = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::       high_band_bypass)));
     high_compressor.RCMode = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter(stringmap.at(Params::     high_band_RCmode)));
 
-    auto interval_value = (float)1 / mapSize*2;
-
-    auto val = -1.0f;
-    for (int i = 0; i < waveshaperMap.size(); i++) {
-        waveshaperMap[i] = val;
-        val += interval_value;
-        DBG("waveshapervalue: " << val);
-
-        DBG("waveshapervalue: " << waveshaperMap[i]);
-    }
-    waveshaper.functionToUse = [&](float input_value) {
+   
+    
+    /*waveshaper.functionToUse = [&](float input_value) {
         input_value = std::abs(input_value);
         auto map_index = (size_t)floor(input_value * mapSize);
         auto clipped_index = std::min(mapSize-1, map_index);
         return waveshaperMap[clipped_index];
+        };*/
+
+    waveshaper.functionToUse = [](float input_value) {
+        return input_value;
         };
 }
 
-float CompressorAudioProcessor::waveshaperFunction(float input_value) {
-    return static_cast<float>(1.0f);//waveshaperMap[floor(input_value * mapSize)];
-}
+
 
 CompressorAudioProcessor::~CompressorAudioProcessor()
 {
@@ -375,7 +369,7 @@ void CompressorAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     auto context = juce::dsp::ProcessContextReplacing<float>(block);
 
 
-    //waveshaper.process(context);
+    waveshaper.process(context);
 
     //perform null test
     /*if (low_compressor.bypass->get())

@@ -25,8 +25,17 @@ CompressorAudioProcessorEditor::CompressorAudioProcessorEditor (CompressorAudioP
     //slider.setSliderStyle(Slider::SliderStyle::Rotary);
     //addAndMakeVisible(slider);
     //setSize (1500, 1000);
-    setSize(800, 800);
-    //setResizable(true, true);
+    setSize(1000, 1000);
+    setResizable(true, true);
+    audioProcessor.waveshaper.functionToUse = [this](float input_value) {
+        input_value = input_value * 0.5;
+        int index = std::floor(std::abs(input_value) * waveshaperGui.sampleSize);
+        index = std::min(waveshaperGui.sampleSize-1, index);
+        auto output_value = waveshaperGui.sampledValues[index];
+        if (input_value > 0)
+            return output_value;
+        return output_value * -1;
+        };
 
 
 
