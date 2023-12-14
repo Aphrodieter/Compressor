@@ -213,15 +213,7 @@ void CompressorAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
         compressor.prepare(spec);
     }
 
-    waveshaper.functionToUse = [&](float input_value) {
-        input_value = input_value * 0.5;
-        int index = std::floor(std::abs(input_value) * mapSize);
-        index = std::min(mapSize - 1, index);
-        auto output_value = waveshaperMap[index];
-        if (input_value > 0)
-            return output_value;
-        return output_value * -1;
-        };
+    
     waveshaper.prepare(spec);
     
 }
@@ -376,7 +368,6 @@ void CompressorAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
 
     auto block = juce::dsp::AudioBlock<float>(buffer);
     auto context = juce::dsp::ProcessContextReplacing<float>(block);
-
 
     waveshaper.process(context);
 

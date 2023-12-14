@@ -326,9 +326,9 @@ public:
 	class Point : public Component
 	{
 	public:
-		Point(WaveshaperGUI& parent) : parent(parent)
+		Point(WaveshaperGUI& parent, MyWaveShaper<float, std::function<float(float)>>& ws, juce::Point<int>* dataPoint) : parent(parent), waveshaper(ws), dataPoint(dataPoint)
 		{
-			constrainer.setMinimumOnscreenAmounts(pointSize, pointSize, pointSize, pointSize);
+			constrainer.setMinimumOnscreenAmounts(pointSize/2, pointSize/2, pointSize/2, pointSize/2);
 		}
 		void paint(Graphics& g) override
 		{
@@ -339,17 +339,16 @@ public:
 		void mouseDown(const MouseEvent& event) override
 		{
 
-			int thisPosition = getThisPositionInVector(parent.points, this);
+			int thisPosition = getPositionInVector(parent.points, this);
 			int lastPosition = thisPosition - 1;
-			lastPointX = lastPosition == -1 ? 0 : parent.points[lastPosition]->getX() + pointSize / 2;
+			lastPointX = lastPosition == -1 ? -pointSize/2 : parent.points[lastPosition]->getX();// +pointSize / 2;
 
 			int nextPosition = thisPosition + 1;
-			nextPointX = nextPosition == parent.points.size() ? parent.getBounds().getWidth() : parent.points[nextPosition]->getX() + pointSize / 2;
-			auto newBounds = Rectangle<int>(lastPointX, 0, nextPointX - lastPointX, parent.getBounds().getHeight());
+			nextPointX = nextPosition == parent.points.size() ? parent.getBounds().getWidth() : parent.points[nextPosition]->getX();// +pointSize / 2;
 			dragger.startDraggingComponent(this, event);
 		}
 
-		int getThisPositionInVector(std::vector<Point*>& points, Point* thisPoint)
+		int getPositionInVector(std::vector<Point*>& points, Point* thisPoint)
 		{
 			std::vector<Point*>::iterator it;
 			it = std::find(points.begin(), points.end(), thisPoint);
@@ -365,19 +364,21 @@ public:
 
 			auto constrained_x = std::max(x, lastPointX);
 			constrained_x = std::min(constrained_x, nextPointX);
-
-			setCentrePosition(constrained_x, y);
+			DBG("constrained_x: " << constrained_x);
+			setBounds(constrained_x, y, pointSize, pointSize);
+			dataPoint->setXY(constrained_x, y);
 			parent.redrawPath();
-			parent.readGraph();
 		}
 
 		void mouseDoubleClick(const MouseEvent& event) override
 		{
-			int thisPosition = getThisPositionInVector(parent.points, this);
+			int thisPosition = getPositionInVector(parent.points, this);
 			parent.points.erase(parent.points.begin() + thisPosition);
+
+			waveshaper.points.erase(std::find(waveshaper.points.begin(), waveshaper.points.end(), dataPoint));
+
 			parent.removeChildComponent(this);
 			parent.redrawPath();
-			parent.readGraph();
 		}
 
 
@@ -387,37 +388,14 @@ public:
 		WaveshaperGUI& parent;
 		ComponentDragger dragger;
 		ComponentBoundsConstrainer constrainer;
+		MyWaveShaper<float, std::function<float(float)>>& waveshaper;
+		juce::Point<int>* dataPoint;
 	};
 
-	WaveshaperGUI()
+	WaveshaperGUI(MyWaveShaper<float, std::function<float(float)>>& ws):waveshaper(ws), path(waveshaper.path)
 	{
-		
 	}
-	void readGraph()
-	{
-		auto interval_value = (float)sampleSize / getWidth();
-
-		auto x_value = 0.0f;
-		for (int i = 0; i < sampleSize; i++) {
-			Line<float>* currentLine = nullptr;
-			PathFlatteningIterator it(path);
-			
-			while (it.next())
-			{
-				currentLine = &Line<float>(it.x1, it.y1, it.x2, it.y2);
-				sampleLine = Line<float>(x_value, getHeight(), x_value, 0);
-
-				if (currentLine->intersects(sampleLine)) {
-					juce::Point<float> intersection = currentLine->getIntersection(sampleLine);
-					sampledValues[i] = std::abs(intersection.getY() / getHeight() - 1);
-					DBG("sampled_Value at " << x_value << " : " << sampledValues[i]);
-				}
-			}
-
-			x_value += interval_value;
-
-		}
-	}
+	
 	void paint(Graphics& g) override
 	{
 		auto bounds = getLocalBounds();
@@ -449,8 +427,15 @@ public:
 		auto bounds = getLocalBounds();
 		bottomLeft = juce::Point<float>(bounds.getBottomLeft().getX(), bounds.getBottomLeft().getY());
 		topRight = juce::Point<float>(bounds.getTopRight().getX(), bounds.getTopRight().getY());
+		waveshaper.windowWidth = getWidth();
+		waveshaper.windowHeight = getHeight();
+		points.clear();
+		removeAllChildren();
+		for (auto point : waveshaper.points)
+		{
+			createGraphicalPoint(point->getX(), point->getY(), point);
+		}
 		redrawPath();
-		readGraph();
 
 	}
 	void mouseDoubleClick(const MouseEvent& event) override
@@ -460,18 +445,25 @@ public:
 		int point_y = event.getMouseDownY();
 
 
-		Point* newPoint = new Point(*this);
-
-		newPoint->setBounds(point_x, point_y, pointSize, pointSize);
-		addAndMakeVisible(newPoint);
-
-		points.push_back(newPoint);
+		auto dataPoint = new juce::Point<int>(point_x, point_y);
+		createGraphicalPoint(point_x, point_y, dataPoint);
+		
+		waveshaper.points.push_back(dataPoint);
 
 
 
 
 		redrawPath();
-		readGraph();
+	}
+
+	void createGraphicalPoint(int point_x, int point_y, juce::Point<int>* dataPoint)
+	{
+		Point* newPoint = new Point(*this, waveshaper, dataPoint);
+
+		newPoint->setBounds(point_x, point_y, pointSize, pointSize);
+		addAndMakeVisible(newPoint);
+
+		points.push_back(newPoint);
 	}
 
 	void redrawPath()
@@ -490,16 +482,16 @@ public:
 		}
 		path.lineTo(topRight);
 		path = std::move(path.createPathWithRoundedCorners(5.0f));
+		waveshaper.readGraph();
 		repaint();
 	}
-	static constexpr int sampleSize = 1024;
-	std::array<float, sampleSize> sampledValues;
+	
 private:
 	Line<float> sampleLine;
 	juce::Point<float> bottomLeft, topRight;
 	std::vector<Point*> points;
-
-	Path path;
+	MyWaveShaper<float, std::function<float(float)>>& waveshaper;
+	Path& path;
 	static constexpr int pointSize = 20;
 	static constexpr int textSize = 20;
 
@@ -521,7 +513,7 @@ private:
 	CompressorAudioProcessor& audioProcessor;
 	//CompressorControls compressorControls{juce::Colours::burlywood, audioProcessor.apvts};
 	//FilterControls filterControls{ juce::Colours::darkolivegreen, audioProcessor.apvts };
-	WaveshaperGUI waveshaperGui;
+	WaveshaperGUI waveshaperGui{audioProcessor.waveshaper};
 
 
 

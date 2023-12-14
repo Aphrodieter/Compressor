@@ -61,11 +61,11 @@
       </OUTPUTS>
     </LAYOUT>
   </FILTER>
-  <FILTER uid="5" x="0.53875" y="0.4939516129032258" useARA="0" uiLastX_Normal="430"
-          uiLastY_Normal="70" uiopen_Normal="0">
+  <FILTER uid="5" x="0.53875" y="0.4939516129032258" useARA="0" uiLastX_Normal="-1293"
+          uiLastY_Normal="2" uiopen_Normal="0">
     <PLUGIN name="Compressor" format="VST3" category="Fx" manufacturer="TonSohn"
             version="1.0.0" file="C:\Program Files\Common Files\VST3\Compressor.vst3\Contents\x86_64-win\Compressor.vst3"
-            uniqueId="5a7e7ee" isInstrument="0" fileTime="18c64042835" infoUpdateTime="18c64049197"
+            uniqueId="5a7e7ee" isInstrument="0" fileTime="18c67f9dc5d" infoUpdateTime="18c680187b1"
             numInputs="2" numOutputs="2" isShell="0" hasARAExtension="0"
             uid="e95c37e3"/>
     <STATE>191.VMjLgXK....O+fWarAhckI2bo8la8HRLt.iHfTlai8FYo41Y8HRUTYTK3HxO9.BOVMEUy.Ea0cVZtMEcgQWY9vSRC8Vav8lak4Fc9XCLt3hKt3hKt3hKt3hYRUUSTEETIckVwTjQisVTTgkdEYjKAQjYPQSPWgUdMcjKAQjct3hdA4hKt3hKt3hKtnTUv.UQAslXuk0UXoWUFE0YQcEV77RRC8Vav8lak4Fc9vyKVMEUy.Ea0cVZtMEcgQWY9..</STATE>
@@ -82,10 +82,27 @@
           uiLastY_Normal="169" uiopen_Normal="1">
     <PLUGIN name="AudioFilePlayer" format="VST3" category="Fx" manufacturer="Matkat Music LLC"
             version="1.0.0" file="C:\Program Files\Common Files\VST3\AudioFilePlayer.vst3\Contents\x86_64-win\AudioFilePlayer.vst3"
-            uniqueId="79fe81c" isInstrument="0" fileTime="18af54f3bb3" infoUpdateTime="18c64049198"
+            uniqueId="79fe81c" isInstrument="0" fileTime="18af54f3bb3" infoUpdateTime="18c680187b1"
             numInputs="2" numOutputs="2" isShell="0" hasARAExtension="0"
             uid="e95d02c7"/>
     <STATE>338.VMjLgjT....O+fWarAhckI2bo8la8HRLt.iHfTlai8FYo41Y8HRUTYTK3HxO9.BOVMEUy.Ea0cVZtMEcgQWY9vSRC8Vav8lak4Fc9DiM43BTIISX1UEaho2ZVkUdAAkKAwDUigWRWkEcQ0VTucmUY4BQPQUQLolShUELhsVRxHlXMYTXqAiUYIFLTMVdqECVhUEQi4VUrIlL3DSXpEjTKYFRTkUaqwVXlgDUjYlcTkkdQckVzMlQHcDNFgzbtf2TrkkUZk1ZVgkbAgVUuEkUYUWPRsjYLkFS1MiTgYWSC4hKt3hKt3hKt3hKt3hRUACTEEzZh8VVWgkdUYTTmE0UX4BQP4hPqcjXm0jLh4BQP4xPt.0Qt3hKt3hKt3hKtQUUCUEQTg2ZrM1YQcUVDUjQicVP77RRC8Vav8lak4Fc9vyKVMEUy.Ea0cVZtMEcgQWY9..</STATE>
+    <LAYOUT>
+      <INPUTS>
+        <BUS index="0" layout="L R"/>
+      </INPUTS>
+      <OUTPUTS>
+        <BUS index="0" layout="L R"/>
+      </OUTPUTS>
+    </LAYOUT>
+  </FILTER>
+  <FILTER uid="7" x="0.3525" y="0.5225933202357563" useARA="0" uiLastX_Normal="75"
+          uiLastY_Normal="267" uiopen_Normal="1">
+    <PLUGIN name="MWaveShaper" format="VST3" category="Fx|Distortion" manufacturer="MeldaProduction"
+            version="16.00" file="C:\Program Files\Common Files\VST3\MeldaProduction\Distortion\MWaveShaper.vst3"
+            uniqueId="1d0ac2eb" isInstrument="0" fileTime="182c546ba38" infoUpdateTime="18c680187b1"
+            numInputs="2" numOutputs="2" isShell="0" hasARAExtension="0"
+            uid="f6f6ccb4"/>
+    <STATE>1517.VMjLgPdA...O+fWarAhckI2bo8la8HRLt.iHfTlai8FYo41Y8HRUTYTK3HxO9.BOVMEUy.Ea0cVZtMEcgQWY9vSRC8Vav8lak4Fc9TSLx3xLuM1UPYjbRMzPDQjQjcSS1cTPmQVUHI2ZvASXyElTgclPMg0cHECNtEVXFIibyTCcmkkLJACYPUyPlITNrA2LKAkZpY0PU01TCkmL1sxJ27DTZIGTpQGT4vDaUgzRQgWZmYVLvciK0MjcNclLYQjUFojYh41a4nkKq3jZ2nUaEUSP18lKOMVMt8VdI0FZp8zZTgzbJIlbUQmdl4xPyrRVhgFSlozQuICZT0TXhQmSy3FS3XEQ2fSc0fVd1LVVkYVayHWP3kESHQiLwIEY3.2aX4RRkgVdXo1ZjwzSKYFQ0.WcxQCavnzb3XUa4IGURMmXlU0cSsVXr0DM0fUZgASZMYkcNk1S1vlbRklSDYmQSk0Q3kGN1XTNOIkLCo1X0bFZ33jLEQzR5QyYnQETpQiUSEmc0n1YO4VSAoldVUjcl4laHcFZpsVQlgEcSE1PtTFZQA2M24hM33VYsIWP3shYqLVUUASaCo0a0MFSygyJ4fWT3LWMDUDN07jYVUVZXQVP0DmaPMSak4hK1U1JJoDQ4PyQt3hZxTGZBcVY4DjKtXCNw4FTyzVYt3BTishRJQTNzbjKtPTL0glPmUVNA4hKkgSbtA0LsUlKt.kUqnjRDkCMG4hKxAScnIzYkkSPt3xS3DmaPMSak4hK1cyJJoDQ4PyQt3BU4TGZBcVY4DjKtLTNw4FTyzVYt3BTmshRJQTNzbjKtP0Q0glPmUVNA4hKScWbtA0LsUlKt.UU2njRDkCMG4hKxMTcnIzYkkSPt3Rd2EmaPMSak4hKPE0MJoDQ4PyQt3xMEUGZBcVY4DjKtr1cw4FTyzVYt3hcOciRJQTNzbjKtnVP0glPmUVNA4hKxXWbtA0LsUlKtXGR2njRDkCMG4hKpITcnIzYkkSPt3BN4EmaPMSak4hKtvyKIMzasA2atUlaz4COIUDYoQ2Pu4Fcx8FarUlb9TSLx3xLuM1UPYjbRMzPDQjQjcSS1cTPmQVUHI2ZvASXyElTgclPMg0cHECNtEVXFIibyTCcmkkLJACYPUyPlITNrA2LKAkZpY0PU01TCkmL1sxJ27DTZIGTpQGT4vDaUgzRQgWZmYVLvciK0MjcNclLYQjUFojYh41a4nkKq3jZ2nUaEUSP18lKOMVMt8VdI0FZp8zZTgzbJIlbUQmdl4xPyrRVhgFSlozQuICZT0TXhQmSy3FS3XEQ2fSc0fVd1LVVkYVayHWP3kESHQiLwIEY3.2aX4RRkgVdXo1ZjwzSKYFQ0.WcxQCavnzb3XUa4IGURMmXlU0cSsVXr0DM0fUZgASZMYkcNk1S1vlbRklSDYmQSk0Q3kGN1XTNOIkLCo1X0bFZ33jLEQzR5QyYnQETpQiUSEmc0n1YO4VSAoldVUjcl4laHcFZpsVQlgEcSE1PtTFZQA2M24hM33VYsIWP3shYqLVUUASaCo0a0MFSygyJ4fWT3LWMDUDN07jYVUVZXQVP0DmaPMSak4hK1U1JJoDQ4PyQt3hZxTGZBcVY4DjKtXCNw4FTyzVYt3BTishRJQTNzbjKtPTL0glPmUVNA4hKkgSbtA0LsUlKt.kUqnjRDkCMG4hKxAScnIzYkkSPt3xS3DmaPMSak4hK1cyJJoDQ4PyQt3BU4TGZBcVY4DjKtLTNw4FTyzVYt3BTmshRJQTNzbjKtP0Q0glPmUVNA4hKScWbtA0LsUlKt.UU2njRDkCMG4hKxMTcnIzYkkSPt3Rd2EmaPMSak4hKPE0MJoDQ4PyQt3xMEUGZBcVY4DjKtr1cw4FTyzVYt3hcOciRJQTNzbjKtnVP0glPmUVNA4hKxXWbtA0LsUlKtXGR2njRDkCMG4hKpITcnIzYkkSPt3BN4EmaPMSak4hKtvyKIUDYoQ2Pu4Fcx8FarUlb9vyKVMEUy.Ea0cVZtMEcgQWY9..</STATE>
     <LAYOUT>
       <INPUTS>
         <BUS index="0" layout="L R"/>
@@ -99,4 +116,6 @@
   <CONNECTION srcFilter="5" srcChannel="1" dstFilter="3" dstChannel="1"/>
   <CONNECTION srcFilter="6" srcChannel="0" dstFilter="5" dstChannel="0"/>
   <CONNECTION srcFilter="6" srcChannel="1" dstFilter="5" dstChannel="1"/>
+  <CONNECTION srcFilter="6" srcChannel="0" dstFilter="7" dstChannel="0"/>
+  <CONNECTION srcFilter="6" srcChannel="1" dstFilter="7" dstChannel="1"/>
 </FILTERGRAPH>

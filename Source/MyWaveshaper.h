@@ -34,10 +34,40 @@ template <typename FloatType, typename Function = FloatType (*) (FloatType)>
 class MyWaveShaper
 {
 public:
-    MyWaveShaper() {};
-    Function functionToUse;
-    std::vector<juce::Point<float>*> points;
+    MyWaveShaper() {
 
+        
+        initializeMap();
+
+
+        functionToUse = [&](float input_value) {
+            input_value = input_value * 0.5;
+            int index = std::floor(std::abs(input_value) * sampleSize);
+            index = std::min(sampleSize - 1, index);
+            auto output_value = sampledValues[index];
+            if (input_value > 0)
+                return output_value;
+            return output_value * -1;
+            };
+
+       /* functionToUse = [&](float input_value) {
+            return readGraph(input_value);
+            };*/
+    };
+
+    void initializeMap()
+    {
+        float interval_value = (float)1 / sampleSize;
+        auto val = 0.0f;
+        for (int i = 0; i < sampleSize; i++) {
+            sampledValues[i] = val;
+            val += interval_value;
+        }
+    }
+
+    std::vector<juce::Point<int>*> points;
+    juce::Path path;
+    float windowWidth, windowHeight;
 
     //==============================================================================
     /** Called before processing starts. */
@@ -68,5 +98,63 @@ public:
         }
     }
 
+
+    //fill map
+    void readGraph()
+    {
+        auto interval_value = (float)sampleSize / windowWidth;
+
+        auto x_value = 0.0f;
+        for (int i = 0; i < sampleSize; i++) {
+            Line<float>* currentLine = nullptr;
+            PathFlatteningIterator it(path);
+
+            while (it.next())
+            {
+                currentLine = &Line<float>(it.x1, it.y1, it.x2, it.y2);
+                auto sampleLine = Line<float>(x_value, windowHeight, x_value, 0);
+
+                if (currentLine->intersects(sampleLine)) {
+                    juce::Point<float> intersection = currentLine->getIntersection(sampleLine);
+                    sampledValues[i] = std::abs(intersection.getY() / windowHeight - 1);
+                }
+            }
+
+            x_value += interval_value;
+
+        }
+    }
+
+    //read single values
+    float readGraph(float input_value)
+    {
+       /* auto x_value = std::abs(input_value * windowWidth);
+        Line<float>* currentLine = nullptr;
+        
+        auto output_value = 0.0f;*/
+        PathFlatteningIterator it(path);
+        while (it.next())
+        {
+        /*    currentLine = &Line<float>(it.x1, it.y1, it.x2, it.y2);
+            auto sampleLine = Line<float>(x_value, windowHeight, x_value, 0);
+
+            if (currentLine->intersects(sampleLine)) {
+                juce::Point<float> intersection = currentLine->getIntersection(sampleLine);
+                output_value = std::abs(intersection.getY() / windowHeight - 1);
+
+                if (input_value > 0)
+                    return output_value;
+                else
+                    return output_value * -1;
+            }*/
+        }
+        return input_value;
+    }
+
     void reset() noexcept {}
+
+private:
+    Function functionToUse;
+    static constexpr int sampleSize = 1024;
+    std::array<float, sampleSize> sampledValues;
 };
