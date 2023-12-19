@@ -41,7 +41,7 @@ public:
 
 
         functionToUse = [&](float input_value) {
-            input_value = input_value * 0.5;
+            //input_value = input_value * 0.5;
             int index = std::floor(std::abs(input_value) * sampleSize);
             index = std::min(sampleSize - 1, index);
             auto output_value = sampledValues[index];
