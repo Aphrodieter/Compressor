@@ -92,7 +92,6 @@ public:
             addAndMakeVisible(slider);
         }
 
-        const auto& stringMap = params::getStringMap();
         std::array<String, 8> paramNames;
         paramNames[0] = bandName + " Threshold";
         paramNames[1] = bandName + " Ratio";
@@ -135,7 +134,7 @@ public:
 
     void resized() override
     {
-        minheight = getLocalBounds().getHeight() / 7;
+        minheight = (float)getLocalBounds().getHeight() / 7;
         for (auto& slider : sliders)
         {
             box.items.add(FlexItem(slider).withWidth(200).withHeight(200));//.withMinHeight(minheight).withMinWidth(minheight));
@@ -190,7 +189,7 @@ public:
 
    void paint(Graphics& g) override
    {
-       auto& bounds = getLocalBounds();
+       auto bounds = getLocalBounds();
        g.setColour(juce::Colours::black);
        g.fillAll();
        bounds.reduce(5, 0);
@@ -206,7 +205,7 @@ public:
        for (size_t i; i < singleBands.size(); i++)
        {
            singleBands[i].setLookAndFeel(&lookAndFeels[i]);
-           ControlRow.items.add(FlexItem(singleBands[i]).withMinHeight(bounds.getHeight()).withMinWidth(bounds.getWidth() / 4).withMargin(FlexItem::Margin(0)));
+           ControlRow.items.add(FlexItem(singleBands[i]).withMinHeight(bounds.getHeight()).withMinWidth((float)bounds.getWidth() / 4).withMargin(FlexItem::Margin(0)));
 
        }
 
@@ -255,7 +254,7 @@ public:
     void paint(Graphics& g) override
     {
 
-        auto& bounds = getLocalBounds();
+        auto bounds = getLocalBounds();
         g.setColour(juce::Colours::black);
         g.fillAll();
         bounds.reduce(5, 5);
@@ -272,7 +271,7 @@ public:
 
         for (auto& slider: sliders)
         {
-            flexbox.items.add(FlexItem(slider).withWidth(bounds.getWidth()/3).withHeight(bounds.getHeight()/3));
+            flexbox.items.add(FlexItem(slider).withWidth((float)bounds.getWidth()/3).withHeight((float)bounds.getHeight()/3));
         }
 
         flexbox.performLayout(getLocalBounds());
