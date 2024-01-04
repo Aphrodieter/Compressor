@@ -21,7 +21,15 @@ public:
     void resized() override;
 
     void createImage(size_t i, Rectangle<int> bounds, float drive);
+
+    void setImageIndex(size_t imageIndex);
+
+    size_t getImageCount();
+
+    void setMaxDrive(float max_drive);
 private:
     std::array<Image, 32> images;
+    size_t imageIndex = 0;
+    float MAX_DRIVE = 1.0f;
 
 };

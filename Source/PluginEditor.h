@@ -302,12 +302,27 @@ private:
 };
 
 using namespace juce;
-class SaturationControls: public Component {
+class SaturationControls: public Component, public Slider::Listener {
 public:
-    SaturationControls(Colour color): color(color)
+    SaturationControls(Colour color, AudioProcessorValueTreeState& apvts): color(color), apvts(apvts)
     {
-        //addAndMakeVisible(drive);
+        
+
+        sliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, "Drive", drive);
+
+        waveshaperImage.setMaxDrive(drive.getMaximum());
+
+        drive.addListener(this);
+        addAndMakeVisible(drive);
         addAndMakeVisible(waveshaperImage);
+    }
+
+    void sliderValueChanged(Slider* slider) override
+    {
+        DBG(slider->getValue());
+        auto imageN = waveshaperImage.getImageCount();
+        auto imageIndex = (slider->getValue() - 1) * imageN / slider->getMaximum();
+        waveshaperImage.setImageIndex(imageIndex);
     }
 
     void paint(Graphics& g) override
@@ -323,14 +338,20 @@ public:
 
     void resized() override
     {
+
         auto bounds = getLocalBounds();
-        drive.setBounds(bounds);
-        waveshaperImage.setBounds(bounds);
+        auto height = bounds.getHeight();
+        auto width = bounds.getWidth();
+
+        drive.setBounds(bounds.removeFromBottom(bounds.getHeight()/2));
+        waveshaperImage.setBounds(bounds.reduced(20,20));
     }
 private:
     LabelRotarySlider drive{ "Drive" };
-    WaveshaperImage waveshaperImage{};
+    WaveshaperImage waveshaperImage;
     Colour color;
+    AudioProcessorValueTreeState& apvts;
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> sliderAttachment;
 };
 
 
@@ -351,7 +372,7 @@ private:
     CompressorAudioProcessor& audioProcessor;
     CompressorControls compressorControls{juce::Colours::burlywood, audioProcessor.apvts};
     FilterControls filterControls{ juce::Colours::darkolivegreen, audioProcessor.apvts };
-    SaturationControls saturationControls{ juce::Colours::blue };
+    SaturationControls saturationControls{ juce::Colours::blue , audioProcessor.apvts };
     
     
     

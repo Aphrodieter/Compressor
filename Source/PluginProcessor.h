@@ -58,6 +58,8 @@ namespace params {
         low_lowmid_cutoff,
         lowmid_highmid_cutoff,
         highmid_high_cutoff,
+
+        drive
     };
 
     static const std::map<Params, juce::String> getStringMap()
@@ -103,6 +105,8 @@ namespace params {
             {low_lowmid_cutoff, "Low-Lowmid-Cutoff"},
             {lowmid_highmid_cutoff, "Lowmid-Highmid-Cutoff"},
             {highmid_high_cutoff, "Highmid-High-Cutoff"},
+
+            {drive, "Drive"}
         };
 
         return map;
@@ -218,6 +222,10 @@ private:
     juce::AudioParameterBool* lowmid_band_solo{ nullptr };
     juce::AudioParameterBool* highmid_band_solo{ nullptr };
     juce::AudioParameterBool* high_band_solo{ nullptr };
+
+    juce::AudioParameterFloat* drive{ nullptr };
+
+    juce::dsp::WaveShaper<float, std::function<float(float)>> waveshaper;
     
 
     juce::AudioBuffer<float> invertedBuffer;

@@ -67,6 +67,9 @@ CompressorAudioProcessor::CompressorAudioProcessor()
     high_compressor.makeup = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::      high_band_makeup)));
     high_compressor.bypass = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::       high_band_bypass)));
     high_compressor.RCMode = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter(stringmap.at(Params::     high_band_RCmode)));
+
+
+    drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::drive)));
 }
 
 CompressorAudioProcessor::~CompressorAudioProcessor()
@@ -182,6 +185,13 @@ void CompressorAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     for (auto & compressor : compressors) {
         compressor.prepare(spec);
     }
+
+
+    waveshaper.prepare(spec);
+    waveshaper.functionToUse = [&](float x) 
+        {
+            return std::tanh(x * drive->get());
+        };
     
 }
 
@@ -333,6 +343,9 @@ void CompressorAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
             buffer.addFrom(i, 0, buffers[j], i, 0, n);
     }
 
+    auto bl = juce::dsp::AudioBlock<float>(buffer);
+    auto ctx = juce::dsp::ProcessContextReplacing<float>(bl);
+    waveshaper.process(ctx);
     //perform null test
     /*if (low_compressor.bypass->get())
         for (int i = 0; i < channel_n; i++)
@@ -603,6 +616,14 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
         stringmap.at(Params::high_band_solo),
         stringmap.at(Params::high_band_solo),
         false
+    ));
+
+
+    layout.add(std::make_unique<AudioParameterFloat>(
+        stringmap.at(Params::drive),
+        stringmap.at(Params::drive),
+        NormalisableRange<float>(1, 10, 0.1, 1.0f),
+        1
     ));
 
 

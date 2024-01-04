@@ -50,13 +50,13 @@ void WaveshaperImage::createImage(size_t i, Rectangle<int> bounds, float drive)
 	y_values.reserve(samplesN);
 
 
-	
+
 	float y;
 	Path path;
 	for (size_t x = 0; x < samplesN; x++)
 	{
 		y = std::tanh(x_values[x] * -drive) * 0.5 + 0.5;
-		y *= samplesN;
+		y *= bounds.getHeight();
 		y_values.push_back(y);
 
 		DBG(y);
@@ -65,14 +65,14 @@ void WaveshaperImage::createImage(size_t i, Rectangle<int> bounds, float drive)
 		else
 			path.lineTo(x, y);
 	}
-	
+
 
 
 	g.setColour(juce::Colours::black);
 	g.strokePath(path, PathStrokeType(5.0f));
 
-	
-	float zeroCrossing = (float) bounds.getHeight() / 2;
+
+	float zeroCrossing = (float)bounds.getHeight() / 2;
 
 	path.lineTo(bounds.getWidth(), zeroCrossing);
 	path.lineTo(0, zeroCrossing);
@@ -82,7 +82,7 @@ void WaveshaperImage::createImage(size_t i, Rectangle<int> bounds, float drive)
 	g.fillPath(path);
 
 	g.setColour(juce::Colours::black);
-	g.drawLine(bounds.getWidth(), zeroCrossing, 0, zeroCrossing, 2.0f);
+	g.drawLine(bounds.getWidth(), zeroCrossing, 0, zeroCrossing, 1.0f);
 }
 
 
@@ -94,14 +94,29 @@ WaveshaperImage::WaveshaperImage()
 
 void WaveshaperImage::paint(Graphics& g)
 {
-	g.drawImage(images[12], getLocalBounds().toFloat());
+	g.drawImage(images[imageIndex], getLocalBounds().toFloat());
+}
+
+void WaveshaperImage::setImageIndex(size_t imgIndex)
+{
+	imageIndex = imgIndex;
+	repaint();
+}
+
+size_t WaveshaperImage::getImageCount()
+{
+	return images.size();
+}
+
+void WaveshaperImage::setMaxDrive(float max_drive)
+{
+	MAX_DRIVE = max_drive;
 }
 
 void WaveshaperImage::resized()
 {
 	auto bounds = getLocalBounds();
 	float drive = 1.0f;
-	const float MAX_DRIVE = 8.0f;
 	float driveInterval = MAX_DRIVE / images.size();
 
 	for (size_t i = 0; i < images.size(); i++)
@@ -109,15 +124,6 @@ void WaveshaperImage::resized()
 		createImage(i, bounds, drive);
 		drive += driveInterval;
 	}
-	
-
-
-
-
-
-
-	//std::tanh()
-
 
 }
 
