@@ -10,6 +10,7 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+#include "WaveshaperImage.h"
 
 //==============================================================================
 /**
@@ -253,16 +254,12 @@ public:
 
     void paint(Graphics& g) override
     {
-
         auto bounds = getLocalBounds();
         g.setColour(juce::Colours::black);
         g.fillAll();
         bounds.reduce(5, 5);
         g.setColour(color);
-
         g.fillRoundedRectangle(bounds.toFloat(), 5);
-
-        
     }
 
     void resized() override
@@ -276,7 +273,7 @@ public:
 
         flexbox.performLayout(getLocalBounds());
         auto width = 200;
-        auto height = 200;
+        auto height = 20;
         control_area_text.setBounds(getWidth() / 2 - width/2 , getHeight() / 6, width, height);
     }
 private:
@@ -304,6 +301,34 @@ private:
     std::array<FilterLookAndFeel, 3> lookAndFeels = { FilterLookAndFeel(juce::Colours::darkblue, juce::Colours::darkcyan), FilterLookAndFeel(juce::Colours::darkcyan,juce::Colours::lightcoral) ,FilterLookAndFeel(juce::Colours::lightcoral,juce::Colours::lightgoldenrodyellow) };
 };
 
+using namespace juce;
+class SaturationControls: public Component {
+public:
+    SaturationControls(Colour color): color(color)
+    {
+        addAndMakeVisible(drive);
+    }
+
+    void paint(Graphics& g) override
+    {
+        auto bounds = getLocalBounds();
+        g.setColour(juce::Colours::black);
+        g.fillAll();
+        bounds.reduce(5, 5);
+        g.setColour(color);
+        g.fillRoundedRectangle(bounds.toFloat(), 5);
+    }
+
+    void resized() override
+    {
+        drive.setBounds(getLocalBounds());
+    }
+private:
+    LabelRotarySlider drive{ "Drive" };
+    WaveshaperImage waveshaperImage{};
+    Colour color;
+};
+
 
 
 class CompressorAudioProcessorEditor  : public juce::AudioProcessorEditor
@@ -322,6 +347,7 @@ private:
     CompressorAudioProcessor& audioProcessor;
     CompressorControls compressorControls{juce::Colours::burlywood, audioProcessor.apvts};
     FilterControls filterControls{ juce::Colours::darkolivegreen, audioProcessor.apvts };
+    SaturationControls saturationControls{ juce::Colours::blue };
     
     
     

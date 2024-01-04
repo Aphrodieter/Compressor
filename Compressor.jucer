@@ -20,6 +20,10 @@
           file="Source/MyEnvelopeDetector.cpp"/>
     <FILE id="b6zUWh" name="MyEnvelopeDetector.h" compile="0" resource="0"
           file="Source/MyEnvelopeDetector.h"/>
+    <FILE id="bCnCb1" name="WaveshaperImage.cpp" compile="1" resource="0"
+          file="Source/WaveshaperImage.cpp"/>
+    <FILE id="ft3CR2" name="WaveshaperImage.h" compile="0" resource="0"
+          file="Source/WaveshaperImage.h"/>
   </MAINGROUP>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
