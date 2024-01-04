@@ -59,27 +59,41 @@ public:
 };
 
 using namespace juce;
-class LabelRotarySlider : public juce::Slider
+class LabelRotarySlider : public juce::Component
 {
 public:
-    LabelRotarySlider(const String& text) {
-        setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
-        setTextBoxStyle(juce::Slider::TextBoxRight, false, 100, 50);
+    LabelRotarySlider(const String& text, float textSize) {
+        slider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
+        slider.setTextBoxStyle(juce::Slider::NoTextBox, false, 50, 20);
         label.setText(text, juce::NotificationType::dontSendNotification);
-        label.setJustificationType(Justification::bottom);
-        label.attachToComponent(this, true);
-        //label.attachToComponent(this, false);
+        label.setJustificationType(Justification::centred);
+
+        Font font(textSize);
+        label.setFont(font);
+        
+        stringWidth = font.getStringWidthFloat(text);
+        stringHeight = font.getHeight();
         addAndMakeVisible(label);
+        addAndMakeVisible(slider);
     }
 
-    //void resized() override
-    //{
-    //    //auto& bounds = getLocalBounds();
-    //    //label.setBounds(bounds.removeFromBottom(bounds.getHeight()/4));
-    //    //setBounds(bounds);
-    //}
+    void resized() override
+    {
+        auto& bounds = getLocalBounds();
+        slider.setBounds(bounds);
+
+        label.setBounds(bounds.getWidth()/2 - stringWidth/2, bounds.getHeight()/2 - stringHeight/2, stringWidth, stringHeight);
+    }
+
+    Slider& getSlider()
+    {
+        return slider;
+    }
 private:
     juce::Label label;
+    juce::Slider slider;
+    float stringWidth;
+    float stringHeight;
 
 };
 using namespace juce;
@@ -106,11 +120,11 @@ public:
 
         using namespace params;
 
-         slider_attachment0 = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, paramNames[0], sliders[0]);
-         slider_attachment1 = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, paramNames[1], sliders[1]);
-         slider_attachment2 = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, paramNames[2], sliders[2]);
-         slider_attachment3 = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, paramNames[3], sliders[3]);
-         slider_attachment4 = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, paramNames[4], sliders[4]);
+         slider_attachment0 = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, paramNames[0], sliders[0].getSlider());
+         slider_attachment1 = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, paramNames[1], sliders[1].getSlider());
+         slider_attachment2 = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, paramNames[2], sliders[2].getSlider());
+         slider_attachment3 = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, paramNames[3], sliders[3].getSlider());
+         slider_attachment4 = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, paramNames[4], sliders[4].getSlider());
 
          comboBoxAttachment = std::make_unique<AudioProcessorValueTreeState::ComboBoxAttachment>(apvts, paramNames[5], RCmode);
          bypassAttachment = std::make_unique<AudioProcessorValueTreeState::ButtonAttachment>(apvts, paramNames[6], bypass);
@@ -135,15 +149,17 @@ public:
 
     void resized() override
     {
+
         minheight = (float)getLocalBounds().getHeight() / 7;
+        minwidth = (float)getLocalBounds().getWidth();
         for (auto& slider : sliders)
         {
-            box.items.add(FlexItem(slider).withWidth(200).withHeight(200));//.withMinHeight(minheight).withMinWidth(minheight));
+            box.items.add(FlexItem(slider).withWidth(minwidth).withHeight(minheight));//.withMinHeight(minheight).withMinWidth(minheight));
         }
        
-        box.items.add(FlexItem(RCmode).withWidth(100).withHeight(200));
-        box.items.add(FlexItem(bypass).withWidth(200).withHeight(200));
-        box.items.add(FlexItem(solo).withWidth(200).withHeight(200));
+        box.items.add(FlexItem(RCmode).withWidth(100).withHeight(minheight));
+        box.items.add(FlexItem(bypass).withWidth(100).withHeight(minheight));
+        box.items.add(FlexItem(solo).withWidth(100).withHeight(minheight));
 
 
         box.performLayout(getLocalBounds());
@@ -160,12 +176,14 @@ private:
         FlexBox::JustifyContent::center
     };
 
-    std::array<LabelRotarySlider, 5> sliders{ LabelRotarySlider("Thres"), LabelRotarySlider("Ratio"), LabelRotarySlider("Att"), LabelRotarySlider("Rel"), LabelRotarySlider("Gain") };
+    float textSize = 20.0f;
+    std::array<LabelRotarySlider, 5> sliders{ LabelRotarySlider("Thres", textSize), LabelRotarySlider("Ratio", textSize), LabelRotarySlider("Attack", textSize), LabelRotarySlider("Release", textSize), LabelRotarySlider("Gain", textSize) };
 
     ToggleButton bypass{ "bypass" }, solo{"solo"};
     ComboBox RCmode{ "RCMode" };
 
     float  minheight{ 100 };
+    float minwidth{ 100 };
 
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> slider_attachment0, slider_attachment1, slider_attachment2, slider_attachment3, slider_attachment4;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> comboBoxAttachment;
@@ -206,7 +224,7 @@ public:
        for (size_t i; i < singleBands.size(); i++)
        {
            singleBands[i].setLookAndFeel(&lookAndFeels[i]);
-           ControlRow.items.add(FlexItem(singleBands[i]).withMinHeight(bounds.getHeight()).withMinWidth((float)bounds.getWidth() / 4).withMargin(FlexItem::Margin(0)));
+           ControlRow.items.add(FlexItem(singleBands[i]).withMinHeight(bounds.getHeight()).withMinWidth((float)bounds.getWidth() / 4));
 
        }
 
@@ -308,11 +326,11 @@ public:
     {
         
 
-        sliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, "Drive", drive);
+        sliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, "Drive", drive.getSlider());
 
-        waveshaperImage.setMaxDrive(drive.getMaximum());
+        waveshaperImage.setMaxDrive(drive.getSlider().getMaximum());
 
-        drive.addListener(this);
+        drive.getSlider().addListener(this);
         addAndMakeVisible(drive);
         addAndMakeVisible(waveshaperImage);
     }
@@ -343,11 +361,11 @@ public:
         auto height = bounds.getHeight();
         auto width = bounds.getWidth();
 
-        drive.setBounds(bounds.removeFromBottom(bounds.getHeight()/2));
+        drive.setBounds(bounds.removeFromBottom(bounds.getHeight()/2).reduced(50));
         waveshaperImage.setBounds(bounds.reduced(20,20));
     }
 private:
-    LabelRotarySlider drive{ "Drive" };
+    LabelRotarySlider drive{ "Drive" , 40.0f};
     WaveshaperImage waveshaperImage;
     Colour color;
     AudioProcessorValueTreeState& apvts;
@@ -372,7 +390,7 @@ private:
     CompressorAudioProcessor& audioProcessor;
     CompressorControls compressorControls{juce::Colours::burlywood, audioProcessor.apvts};
     FilterControls filterControls{ juce::Colours::darkolivegreen, audioProcessor.apvts };
-    SaturationControls saturationControls{ juce::Colours::blue , audioProcessor.apvts };
+    SaturationControls saturationControls{ juce::Colours::green , audioProcessor.apvts };
     
     
     

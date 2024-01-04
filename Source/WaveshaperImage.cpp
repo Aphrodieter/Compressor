@@ -38,10 +38,10 @@ void WaveshaperImage::createImage(size_t i, Rectangle<int> bounds, float drive)
 	images[i] = Image(Image::RGB, bounds.getWidth(), bounds.getHeight(), true);
 
 	Graphics g(images[i]);
-	g.setColour(Colours::white);
+	g.setColour(Colours::beige);
 	g.fillRect(bounds);
 
-	size_t samplesN = bounds.getWidth();
+	size_t samplesN = bounds.getWidth()/4;
 	std::vector<float> x_values;
 
 	x_values = linspace(-1.0f, 1.0f, samplesN);
@@ -63,7 +63,7 @@ void WaveshaperImage::createImage(size_t i, Rectangle<int> bounds, float drive)
 		if (x == 0)
 			path.startNewSubPath(0, y);
 		else
-			path.lineTo(x, y);
+			path.lineTo((x_values[x] + 1) * bounds.getWidth()/2, y);
 	}
 
 
@@ -78,7 +78,7 @@ void WaveshaperImage::createImage(size_t i, Rectangle<int> bounds, float drive)
 	path.lineTo(0, zeroCrossing);
 	path.closeSubPath();
 
-	g.setColour(juce::Colours::red);
+	g.setColour(juce::Colours::green);
 	g.fillPath(path);
 
 	g.setColour(juce::Colours::black);
@@ -92,10 +92,7 @@ WaveshaperImage::WaveshaperImage()
 
 }
 
-void WaveshaperImage::paint(Graphics& g)
-{
-	g.drawImage(images[imageIndex], getLocalBounds().toFloat());
-}
+
 
 void WaveshaperImage::setImageIndex(size_t imgIndex)
 {
@@ -113,9 +110,22 @@ void WaveshaperImage::setMaxDrive(float max_drive)
 	MAX_DRIVE = max_drive;
 }
 
+void WaveshaperImage::paint(Graphics& g)
+{
+	auto bounds = getLocalBounds();
+
+	g.setColour(juce::Colours::black);
+	g.fillRoundedRectangle(bounds.toFloat(), 3.0f);
+	bounds.reduce(4, 4);
+
+	g.drawImage(images[imageIndex], bounds.toFloat());
+}
+
 void WaveshaperImage::resized()
 {
 	auto bounds = getLocalBounds();
+
+
 	float drive = 1.0f;
 	float driveInterval = MAX_DRIVE / images.size();
 

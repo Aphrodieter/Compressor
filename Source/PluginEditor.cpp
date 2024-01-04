@@ -21,15 +21,13 @@ CompressorAudioProcessorEditor::CompressorAudioProcessorEditor (CompressorAudioP
     // editor's size to whatever you need it to be.
     //addAndMakeVisible(compressorControls);
     //addAndMakeVisible(filterControls);
-    //addAndMakeVisible(BandControls);
-    //slider.setSliderStyle(Slider::SliderStyle::Rotary);
-    //addAndMakeVisible(slider);
     addAndMakeVisible(saturationControls);
-    setSize (500, 500);
+    setSize (1500, 1000);
+
     
 
 
-    //setResizable(true, true);
+    setResizable(true, true);
 
 
 
