@@ -306,7 +306,8 @@ class SaturationControls: public Component {
 public:
     SaturationControls(Colour color): color(color)
     {
-        addAndMakeVisible(drive);
+        //addAndMakeVisible(drive);
+        addAndMakeVisible(waveshaperImage);
     }
 
     void paint(Graphics& g) override
@@ -317,11 +318,14 @@ public:
         bounds.reduce(5, 5);
         g.setColour(color);
         g.fillRoundedRectangle(bounds.toFloat(), 5);
+
     }
 
     void resized() override
     {
-        drive.setBounds(getLocalBounds());
+        auto bounds = getLocalBounds();
+        drive.setBounds(bounds);
+        waveshaperImage.setBounds(bounds);
     }
 private:
     LabelRotarySlider drive{ "Drive" };

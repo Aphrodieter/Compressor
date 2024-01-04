@@ -19,8 +19,9 @@ public:
     void paint(Graphics& g) override;
 
     void resized() override;
+
+    void createImage(size_t i, Rectangle<int> bounds, float drive);
 private:
-    const size_t imageN{32};
-    std::array<Image, imageN> images;
+    std::array<Image, 32> images;
 
 };

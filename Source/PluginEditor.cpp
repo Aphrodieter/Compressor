@@ -29,7 +29,7 @@ CompressorAudioProcessorEditor::CompressorAudioProcessorEditor (CompressorAudioP
     
 
 
-
+    //setResizable(true, true);
 
 
 
