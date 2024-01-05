@@ -39,6 +39,16 @@ public:
 
 
     }
+
+    Slider::SliderLayout getSliderLayout(Slider& slider) override
+    {
+        Slider::SliderLayout layout;
+        layout.sliderBounds = slider.getLocalBounds();
+
+        auto textBoxBounds = slider.getLocalBounds().withSizeKeepingCentre(40, 24);
+        layout.textBoxBounds = textBoxBounds.withY(textBoxBounds.getY() + 20);
+        return layout;
+    }
 };
 
 using namespace juce;
@@ -59,12 +69,33 @@ public:
 };
 
 using namespace juce;
+class SliderLookAndFeel: public LookAndFeel_V4
+{
+public:
+    SliderLookAndFeel()
+    {
+
+    }
+
+    Slider::SliderLayout getSliderLayout(Slider& slider) override
+    {
+        Slider::SliderLayout layout;
+        layout.sliderBounds = slider.getLocalBounds();
+        layout.textBoxBounds = slider.getLocalBounds().withSizeKeepingCentre(40, 24);
+        return layout;
+    }
+private:
+
+
+};
+
+using namespace juce;
 class LabelRotarySlider : public juce::Component
 {
 public:
     LabelRotarySlider(const String& text, float textSize) {
         slider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
-        slider.setTextBoxStyle(juce::Slider::NoTextBox, false, 50, 20);
+        slider.setTextBoxStyle(juce::Slider::TextBoxAbove, false, 50, 20);
         label.setText(text, juce::NotificationType::dontSendNotification);
         label.setJustificationType(Justification::centred);
 
@@ -73,8 +104,15 @@ public:
         
         stringWidth = font.getStringWidthFloat(text);
         stringHeight = font.getHeight();
+        //slider.setLookAndFeel(&sliderlaf);
         addAndMakeVisible(label);
         addAndMakeVisible(slider);
+    }
+
+    void paint(Graphics& g) override
+    {
+        /*auto bounds = getLocalBounds();
+        g.drawRect(bounds.getWidth() / 2 - stringWidth / 2, bounds.getHeight() / 2 - stringHeight / 2, stringWidth, stringHeight);*/
     }
 
     void resized() override
@@ -82,7 +120,8 @@ public:
         auto& bounds = getLocalBounds();
         slider.setBounds(bounds);
 
-        label.setBounds(bounds.getWidth()/2 - stringWidth/2, bounds.getHeight()/2 - stringHeight/2, stringWidth, stringHeight);
+        //label.setBounds(bounds.getWidth()/2 - stringWidth/2, bounds.getHeight()/2 - stringHeight/2, stringWidth, stringHeight);
+        label.setBounds(bounds.withSizeKeepingCentre(stringWidth+5, stringHeight));
     }
 
     Slider& getSlider()
@@ -94,6 +133,7 @@ private:
     juce::Slider slider;
     float stringWidth;
     float stringHeight;
+    SliderLookAndFeel sliderlaf;
 
 };
 using namespace juce;
@@ -177,7 +217,7 @@ private:
     };
 
     float textSize = 20.0f;
-    std::array<LabelRotarySlider, 5> sliders{ LabelRotarySlider("Thres", textSize), LabelRotarySlider("Ratio", textSize), LabelRotarySlider("Attack", textSize), LabelRotarySlider("Release", textSize), LabelRotarySlider("Gain", textSize) };
+    std::array<LabelRotarySlider, 5> sliders{ LabelRotarySlider("Thres", textSize), LabelRotarySlider("Ratio", textSize), LabelRotarySlider("Att", textSize), LabelRotarySlider("Rel", textSize), LabelRotarySlider("Gain", textSize) };
 
     ToggleButton bypass{ "bypass" }, solo{"solo"};
     ComboBox RCmode{ "RCMode" };
@@ -264,7 +304,7 @@ public:
 
         control_area_text.setText("FILTERSEKTION", NotificationType::dontSendNotification);
         control_area_text.setJustificationType(Justification::centredTop);
-        control_area_text.setFont(control_area_text.getFont().boldened());
+        control_area_text.setFont(Font(20.0f).boldened());
         addAndMakeVisible(control_area_text);
 
 
@@ -290,9 +330,11 @@ public:
         }
 
         flexbox.performLayout(getLocalBounds());
-        auto width = 200;
-        auto height = 20;
-        control_area_text.setBounds(getWidth() / 2 - width/2 , getHeight() / 6, width, height);
+        auto text = control_area_text.getText();
+        auto font = control_area_text.getFont();
+        auto textWidth = font.getStringWidthFloat(text);
+        auto textHeight = font.getHeight();
+        control_area_text.setBounds(getWidth() / 2 - textWidth /2 , getHeight() / 6, textWidth, textHeight);
     }
 private:
     std::array<Slider, 3> sliders;
@@ -365,7 +407,7 @@ public:
         waveshaperImage.setBounds(bounds.reduced(20,20));
     }
 private:
-    LabelRotarySlider drive{ "Drive" , 40.0f};
+    LabelRotarySlider drive{ "D" , 40.0f};
     WaveshaperImage waveshaperImage;
     Colour color;
     AudioProcessorValueTreeState& apvts;
