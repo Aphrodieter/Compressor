@@ -59,7 +59,8 @@ namespace params {
         lowmid_highmid_cutoff,
         highmid_high_cutoff,
 
-        drive
+        drive,
+        dry_wet
     };
 
     static const std::map<Params, juce::String> getStringMap()
@@ -106,7 +107,9 @@ namespace params {
             {lowmid_highmid_cutoff, "Lowmid-Highmid-Cutoff"},
             {highmid_high_cutoff, "Highmid-High-Cutoff"},
 
-            {drive, "Drive"}
+            {drive, "Drive"},
+
+            {dry_wet, "Dry_Wet"}
         };
 
         return map;
@@ -224,12 +227,17 @@ private:
     juce::AudioParameterBool* high_band_solo{ nullptr };
 
     juce::AudioParameterFloat* drive{ nullptr };
+    juce::AudioParameterFloat* dry_wet{ nullptr };
+
 
     juce::dsp::WaveShaper<float, std::function<float(float)>> waveshaper;
     
 
     juce::AudioBuffer<float> invertedBuffer;
     std::array<juce::AudioBuffer<float>, 4> buffers;
+    juce::AudioBuffer<float> dryBuffer;
+    std::array<juce::AudioBuffer<float>, 4> dryBuffers;
+
     
 
     

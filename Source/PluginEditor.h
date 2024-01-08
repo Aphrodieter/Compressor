@@ -454,10 +454,6 @@ private:
 
 	std::array<FilterLookAndFeel, 3> FilterLookAndFeels = { FilterLookAndFeel(juce::Colours::darkblue, juce::Colours::darkcyan), FilterLookAndFeel(juce::Colours::darkcyan,juce::Colours::lightcoral) ,FilterLookAndFeel(juce::Colours::lightcoral,juce::Colours::lightgoldenrodyellow) };
 
-	std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> slider_attachment0, slider_attachment1, slider_attachment2, slider_attachment3, slider_attachment4;
-	std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> comboBoxAttachment;
-	std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> bypassAttachment, soloAttachment;
-
 	std::array<BandLookAndFeel, 4> BandLookAndFeels = { BandLookAndFeel(juce::Colours::darkblue), BandLookAndFeel(juce::Colours::darkcyan) ,BandLookAndFeel(juce::Colours::lightcoral) ,BandLookAndFeel(juce::Colours::lightgoldenrodyellow) };
 
 	SingleBandControl& singleBand;
@@ -469,6 +465,44 @@ private:
 		{"Highband", 3}
 	};
 
+};
+
+using namespace juce;
+class GeneralControls : public Component
+{
+public:
+	GeneralControls(AudioProcessorValueTreeState& apvts, const Colour& color): apvts(apvts), color(color)
+	{
+		auto stringMap = params::getStringMap();
+		sliderAttachement = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, stringMap.at(params::dry_wet), dry_wet.getSlider());
+		addAndMakeVisible(dry_wet);
+	}
+
+	void paint(Graphics& g) override
+	{
+		auto bounds = getLocalBounds();
+		g.setColour(juce::Colours::black);
+		g.fillAll();
+		bounds.reduce(5, 5);
+		g.setColour(color);
+		g.fillRoundedRectangle(bounds.toFloat(), 5);
+	}
+
+	void resized() override
+	{
+		FlexBox fb;
+		fb.flexDirection = FlexBox::Direction::rowReverse;
+		
+		
+		fb.items.add(FlexItem(dry_wet).withFlex(1.0f));
+		fb.performLayout(getLocalBounds());
+	}
+
+private:
+	AudioProcessorValueTreeState& apvts;
+	const Colour& color;
+	LabelRotarySlider dry_wet{"Dry/Wet", 15.0f};
+	std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> sliderAttachement;
 };
 
 using namespace juce;
@@ -543,6 +577,7 @@ private:
 	//CompressorControls compressorControls{ juce::Colours::burlywood, audioProcessor.apvts };
 	SingleBandControl compressorControls{ audioProcessor.apvts, "Lowband" ,juce::Colours::burlywood };
 	FilterControls filterControls{ juce::Colours::darkolivegreen, audioProcessor.apvts , compressorControls};
+	GeneralControls generalControls{ audioProcessor.apvts, juce::Colours::beige };
 	SaturationControls saturationControls{ juce::Colours::green , audioProcessor.apvts };
 
 

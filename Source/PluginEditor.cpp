@@ -19,15 +19,16 @@ CompressorAudioProcessorEditor::CompressorAudioProcessorEditor (CompressorAudioP
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    //addAndMakeVisible(compressorControls);
-    //addAndMakeVisible(filterControls);
-    addAndMakeVisible(saturationControls);
-    setSize (1500, 500);
+    addAndMakeVisible(compressorControls);
+    addAndMakeVisible(filterControls);
+    addAndMakeVisible(generalControls);
+    //addAndMakeVisible(saturationControls);
+    setSize (1000, 500);
 
     
 
 
-    setResizable(true, true);
+    //setResizable(true, true);
 
 
 
@@ -54,7 +55,10 @@ void CompressorAudioProcessorEditor::paint (juce::Graphics& g)
 void CompressorAudioProcessorEditor::resized()
 {
     auto& bounds = getBounds();
-    //compressorControls.setBounds(bounds.removeFromTop(getHeight()/2));
-    //filterControls.setBounds(bounds);
-    saturationControls.setBounds(bounds);
+
+    compressorControls.setBounds(bounds.removeFromTop(getHeight()/2));
+    generalControls.setBounds(bounds.removeFromBottom(getHeight() / 6));
+    filterControls.setBounds(bounds);
+
+    //saturationControls.setBounds(bounds);
 }
