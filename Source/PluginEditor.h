@@ -15,16 +15,23 @@
 //==============================================================================
 /**
 */
+static const juce::Colour FILTERCONTROL_COLOR = juce::Colours::darkolivegreen;
+static const juce::Colour BANDCONTROL_COLOR = juce::Colours::burlywood;
+static const juce::Colour GENERALCONTROL_COLOR = juce::Colours::darksalmon;
+static const juce::Colour SATURATIONCONTROL_COLOR = juce::Colours::darkolivegreen;
+
+
 using namespace juce;
 class BandLookAndFeel : public LookAndFeel_V4
 {
 public:
 	BandLookAndFeel(const juce::Colour& color)
 	{
+		Colour transparent = Colour::Colour(0.0f, 0.0f, 0.0f, 0.0f);
 		setColour(Slider::ColourIds::rotarySliderFillColourId, color);
-		setColour(Slider::ColourIds::textBoxOutlineColourId, juce::Colours::burlywood);
+		setColour(Slider::ColourIds::textBoxOutlineColourId, transparent);
 
-		setColour(Slider::ColourIds::textBoxTextColourId, juce::Colours::black);
+		setColour(Slider::ColourIds::textBoxTextColourId, Colours::black);
 
 
 		/*setColour(ToggleButton::ColourIds::textColourId, juce::Colours::black);
@@ -138,11 +145,73 @@ private:
 	SliderLookAndFeel sliderlaf;
 
 };
+
+using namespace juce;
+class SaturationControls : public Component, public Slider::Listener {
+public:
+	SaturationControls(Colour color, AudioProcessorValueTreeState& apvts) : color(color), apvts(apvts)
+	{
+
+
+		sliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, "Drive", drive.getSlider());
+
+		waveshaperImage.setMaxDrive(drive.getSlider().getMaximum());
+
+		drive.getSlider().addListener(this);
+		drive.setLookAndFeel(&laf);
+		addAndMakeVisible(drive);
+		addAndMakeVisible(waveshaperImage);
+
+
+	}
+
+	void sliderValueChanged(Slider* slider) override
+	{
+		DBG(slider->getValue());
+		auto imageN = waveshaperImage.getImageCount();
+		auto imageIndex = (slider->getValue() - 1) * imageN / slider->getMaximum();
+		waveshaperImage.setImageIndex(imageIndex);
+	}
+
+	void paint(Graphics& g) override
+	{
+		auto bounds = getLocalBounds();
+		g.setColour(juce::Colours::black);
+		g.fillAll();
+		int borderThickness = 5;
+		//bounds.reduce(5, 5);
+		bounds.removeFromBottom(borderThickness);
+		bounds.removeFromRight(borderThickness);
+		bounds.removeFromTop(borderThickness);
+		g.setColour(color);
+		g.fillRoundedRectangle(bounds.toFloat(), 5);
+
+	}
+
+	void resized() override
+	{
+
+		auto bounds = getLocalBounds();
+		auto height = bounds.getHeight();
+		auto width = bounds.getWidth();
+
+		drive.setBounds(bounds.removeFromBottom(bounds.getHeight() / 2));
+		waveshaperImage.setBounds(bounds.reduced(20, 20));
+	}
+private:
+	LabelRotarySlider drive{ "D" , 40.0f };
+	WaveshaperImage waveshaperImage;
+	Colour color;
+	AudioProcessorValueTreeState& apvts;
+	std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> sliderAttachment;
+	BandLookAndFeel laf{ Colours::black };
+};
+
 using namespace juce;
 class SingleBandControl : public juce::Component
 {
 public:
-	SingleBandControl(AudioProcessorValueTreeState& apvts, const String& bandName, const Colour& color) : apvts(apvts), color(color)
+	SingleBandControl(const Colour& color, AudioProcessorValueTreeState& apvts, const String& bandName) : apvts(apvts), color(color)
 	{
 		for (auto& slider : sliders)
 		{
@@ -228,9 +297,10 @@ public:
 		auto bounds = getLocalBounds();
 		height = (float)bounds.getHeight();
 		width = (float)bounds.getWidth() /6;
+
 		for (auto& slider : sliders)
 		{
-			sliderBox.items.add(FlexItem(slider).withWidth(width).withHeight(height));//.withMinHeight(minheight).withMinWidth(minheight));
+			sliderBox.items.add(FlexItem(slider).withFlex(1.0f));//.withWidth(width).withHeight(height));//.withMinHeight(minheight).withMinWidth(minheight));
 		}
 
 		FlexBox buttonBox;
@@ -337,6 +407,7 @@ private:
 //	std::array<BandLookAndFeel, 4> lookAndFeels = { BandLookAndFeel(juce::Colours::darkblue), BandLookAndFeel(juce::Colours::darkcyan) ,BandLookAndFeel(juce::Colours::lightcoral) ,BandLookAndFeel(juce::Colours::lightgoldenrodyellow) };
 //};
 
+
 using namespace juce;
 class FilterControls : public Component, public TextButton::Listener
 {
@@ -369,7 +440,7 @@ public:
 		control_area_text.setText("FILTERSEKTION", NotificationType::dontSendNotification);
 		control_area_text.setJustificationType(Justification::centredTop);
 		control_area_text.setFont(Font(20.0f).boldened());
-		addAndMakeVisible(control_area_text);
+		//addAndMakeVisible(control_area_text);
 
 
 	}
@@ -471,10 +542,11 @@ using namespace juce;
 class GeneralControls : public Component
 {
 public:
-	GeneralControls(AudioProcessorValueTreeState& apvts, const Colour& color): apvts(apvts), color(color)
+	GeneralControls(const Colour& color, AudioProcessorValueTreeState& apvts): apvts(apvts), color(color)
 	{
 		auto stringMap = params::getStringMap();
 		sliderAttachement = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, stringMap.at(params::dry_wet), dry_wet.getSlider());
+		dry_wet.setLookAndFeel(&laf);
 		addAndMakeVisible(dry_wet);
 	}
 
@@ -483,7 +555,11 @@ public:
 		auto bounds = getLocalBounds();
 		g.setColour(juce::Colours::black);
 		g.fillAll();
-		bounds.reduce(5, 5);
+		int borderThickness = 5;
+		//bounds.reduce(5, 5);
+		bounds.removeFromBottom(borderThickness);
+		bounds.removeFromLeft(borderThickness);
+		bounds.removeFromRight(borderThickness);
 		g.setColour(color);
 		g.fillRoundedRectangle(bounds.toFloat(), 5);
 	}
@@ -503,60 +579,9 @@ private:
 	const Colour& color;
 	LabelRotarySlider dry_wet{"Dry/Wet", 15.0f};
 	std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> sliderAttachement;
+	BandLookAndFeel laf{ Colours::black };
 };
 
-using namespace juce;
-class SaturationControls : public Component, public Slider::Listener {
-public:
-	SaturationControls(Colour color, AudioProcessorValueTreeState& apvts) : color(color), apvts(apvts)
-	{
-
-
-		sliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, "Drive", drive.getSlider());
-
-		waveshaperImage.setMaxDrive(drive.getSlider().getMaximum());
-
-		drive.getSlider().addListener(this);
-		addAndMakeVisible(drive);
-		addAndMakeVisible(waveshaperImage);
-	}
-
-	void sliderValueChanged(Slider* slider) override
-	{
-		DBG(slider->getValue());
-		auto imageN = waveshaperImage.getImageCount();
-		auto imageIndex = (slider->getValue() - 1) * imageN / slider->getMaximum();
-		waveshaperImage.setImageIndex(imageIndex);
-	}
-
-	void paint(Graphics& g) override
-	{
-		auto bounds = getLocalBounds();
-		g.setColour(juce::Colours::black);
-		g.fillAll();
-		bounds.reduce(5, 5);
-		g.setColour(color);
-		g.fillRoundedRectangle(bounds.toFloat(), 5);
-
-	}
-
-	void resized() override
-	{
-
-		auto bounds = getLocalBounds();
-		auto height = bounds.getHeight();
-		auto width = bounds.getWidth();
-
-		drive.setBounds(bounds.removeFromBottom(bounds.getHeight() / 2).reduced(50));
-		waveshaperImage.setBounds(bounds.reduced(20, 20));
-	}
-private:
-	LabelRotarySlider drive{ "D" , 40.0f };
-	WaveshaperImage waveshaperImage;
-	Colour color;
-	AudioProcessorValueTreeState& apvts;
-	std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> sliderAttachment;
-};
 
 
 
@@ -575,10 +600,10 @@ private:
 	// access the processor object that created it.
 	CompressorAudioProcessor& audioProcessor;
 	//CompressorControls compressorControls{ juce::Colours::burlywood, audioProcessor.apvts };
-	SingleBandControl compressorControls{ audioProcessor.apvts, "Lowband" ,juce::Colours::burlywood };
-	FilterControls filterControls{ juce::Colours::darkolivegreen, audioProcessor.apvts , compressorControls};
-	GeneralControls generalControls{ audioProcessor.apvts, juce::Colours::beige };
-	SaturationControls saturationControls{ juce::Colours::green , audioProcessor.apvts };
+	SingleBandControl compressorControls{ BANDCONTROL_COLOR, audioProcessor.apvts, "Lowband"};
+	FilterControls filterControls{ FILTERCONTROL_COLOR, audioProcessor.apvts , compressorControls};
+	GeneralControls generalControls{ FILTERCONTROL_COLOR, audioProcessor.apvts};
+	SaturationControls saturationControls{ BANDCONTROL_COLOR, audioProcessor.apvts };
 
 
 

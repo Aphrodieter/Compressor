@@ -337,7 +337,7 @@ void CompressorAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 	for (int i = 0; i < compressors.size(); i++)
 	{
 		compressors[i].updateCompressorSettings();
-		//compressors[i].process(ctxs[i]);
+		compressors[i].process(ctxs[i]);
 	}
 
 	int n = buffer.getNumSamples();
@@ -355,10 +355,6 @@ void CompressorAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 		dryBuffers[j].applyGain(dryAmount);
 		for (int i = 0; i < channel_n; i++)
 		{
-			/*for (size_t x = 0; x < n; x++)
-			{
-				DBG("wetSample: " << buffers[j].getSample(i, x) << " drySample: " << dryBuffers[j].getSample(i, x));
-			}*/
 			if (solos[j] || !anyOtherBandSoloed(solos)) {
 				buffer.addFrom(i, 0, buffers[j], i, 0, n);
 				buffer.addFrom(i, 0, dryBuffers[j], i, 0, n);
