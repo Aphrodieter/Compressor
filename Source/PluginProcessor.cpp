@@ -305,7 +305,7 @@ void CompressorAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 	AP2.process(context0);
 	AP3.process(context0);
 
-	dryBuffers[0] = buffers[0];
+	dryBuffers[0].makeCopyOf(buffers[0]);
 
 	//create upperband
 	HP1.process(context1);
@@ -316,7 +316,7 @@ void CompressorAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 	HP2.process(context3);
 	AP4.process(context3);
 
-	dryBuffers[3] = buffers[3];
+	dryBuffers[3].makeCopyOf(buffers[3]);
 
 	//create center bands
 	LP2.process(context1);
@@ -324,20 +324,20 @@ void CompressorAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 	//create highmid band
 	buffers[2] = buffers[1];
 	HP3.process(context2);
-	dryBuffers[2] = buffers[2];
+	dryBuffers[2].makeCopyOf(buffers[2]);
 
 
 	//create lowmid band
 	LP3.process(context1);
 
-	dryBuffers[1] = buffers[1];
+	dryBuffers[1].makeCopyOf(buffers[1]);
 
 
 
 	for (int i = 0; i < compressors.size(); i++)
 	{
 		compressors[i].updateCompressorSettings();
-		compressors[i].process(ctxs[i]);
+		//compressors[i].process(ctxs[i]);
 	}
 
 	int n = buffer.getNumSamples();
@@ -349,20 +349,21 @@ void CompressorAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 	auto dryAmount = 1 - wetAmount;
 
 	buffer.clear();
-	for (int i = 0; i < channel_n; i++)
-	{
-		for (int j = 0; j < buffers.size(); j++) {
-			buffers[j].applyGain(wetAmount);
-			dryBuffers[j].applyGain(dryAmount);
+
+	for (int j = 0; j < buffers.size(); j++) {
+		buffers[j].applyGain(wetAmount);
+		dryBuffers[j].applyGain(dryAmount);
+		for (int i = 0; i < channel_n; i++)
+		{
+			/*for (size_t x = 0; x < n; x++)
+			{
+				DBG("wetSample: " << buffers[j].getSample(i, x) << " drySample: " << dryBuffers[j].getSample(i, x));
+			}*/
 			if (solos[j] || !anyOtherBandSoloed(solos)) {
 				buffer.addFrom(i, 0, buffers[j], i, 0, n);
 				buffer.addFrom(i, 0, dryBuffers[j], i, 0, n);
 			}
 		}
-
-
-
-
 	}
 
 
