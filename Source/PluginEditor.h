@@ -485,6 +485,10 @@ public:
 		control_area_text.setFont(Font(20.0f).boldened());
 		//addAndMakeVisible(control_area_text);
 
+		auto stringMap = params::getStringMap();
+		dryWetAttachement = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, stringMap.at(params::dry_wet), dry_wet_slider.getSlider());
+		dry_wet_slider.setLookAndFeel(&generalControlLaf);
+		addAndMakeVisible(dry_wet_slider);
 
 	}
 
@@ -529,12 +533,23 @@ public:
 
 		bandSelectorBox.performLayout(bandSelectorBounds.reduced(20));
 
+		FlexBox sliderBox;
+		sliderBox.flexDirection = FlexBox::Direction::row;
+
 		for (auto& slider : sliders)
 		{
-			flexbox.items.add(FlexItem(slider).withWidth((float)bounds.getWidth() / 3).withHeight((float)bounds.getHeight() / 3));
+			sliderBox.items.add(FlexItem(slider).withWidth((float)bounds.getWidth() / 3).withHeight((float)bounds.getHeight() / 3));
 		}
 
-		flexbox.performLayout(bounds);
+		sliderBox.performLayout(bounds);
+
+		/*FlexBox generalControlBox;
+		generalControlBox.flexDirection = FlexBox::Direction::row;
+		generalControlBox.items.add(FlexItem(dry_wet_slider).withFlex(1.0f));
+		generalControlBox.performLayout(bounds.removeFromBottom(bounds.getHeight()/2));*/
+
+		dry_wet_slider.setBounds(bounds.removeFromRight(bounds.getWidth() / 5).removeFromBottom(bounds.getHeight() / 1.5));
+
 		auto text = control_area_text.getText();
 		auto font = control_area_text.getFont();
 		auto textWidth = font.getStringWidthFloat(text);
@@ -542,6 +557,8 @@ public:
 		control_area_text.setBounds(getWidth() / 2 - textWidth / 2, getHeight() / 6, textWidth, textHeight);
 	}
 private:
+	LabelRotarySlider dry_wet_slider{ "Dry/Wet", 15.0f };
+
 	std::array<Slider, 3> sliders;
 	Slider& low_lowmid_crossover = sliders[0];
 	Slider& lowmid_highmid_crossover = sliders[1];
@@ -555,19 +572,14 @@ private:
 	TextButton& high_selector = bandSelectors[3];
 
 	std::array<std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment>, 3> attachements;
+	std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> dryWetAttachement;
+
 	std::array<String, 3> paramNames = { "Low-Lowmid-Cutoff", "Lowmid-Highmid-Cutoff","Highmid-High-Cutoff" };
 
 	AudioProcessorValueTreeState& apvts;
 	const Colour& color;
 
-	FlexBox flexbox
-	{
-		FlexBox::Direction::row,
-		FlexBox::Wrap::noWrap,
-		FlexBox::AlignContent::center,
-		FlexBox::AlignItems::center,
-		FlexBox::JustifyContent::center
-	};
+	BandLookAndFeel generalControlLaf{ Colours::black };
 	Label control_area_text;
 
 	std::array<FilterLookAndFeel, 3> FilterLookAndFeels = { {
@@ -623,8 +635,6 @@ public:
 	{
 		FlexBox fb;
 		fb.flexDirection = FlexBox::Direction::rowReverse;
-
-
 		fb.items.add(FlexItem(dry_wet).withFlex(1.0f));
 		fb.performLayout(getLocalBounds());
 	}
@@ -658,7 +668,7 @@ private:
 	SingleBandControl compressorControls{ BANDCONTROL_COLOR, audioProcessor.apvts, "Lowband" };
 	SaturationControls saturationControls{ BANDCONTROL_COLOR, audioProcessor.apvts };
 	FilterControls filterControls{ FILTERCONTROL_COLOR, audioProcessor.apvts , compressorControls, saturationControls };
-	GeneralControls generalControls{ FILTERCONTROL_COLOR, audioProcessor.apvts };
+	//GeneralControls generalControls{ FILTERCONTROL_COLOR, audioProcessor.apvts };
 
 
 
