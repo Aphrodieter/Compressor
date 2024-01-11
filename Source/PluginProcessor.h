@@ -26,6 +26,7 @@ namespace params {
         low_band_bypass,
         low_band_solo,
         low_band_RCmode,
+        low_band_drive,
 
 
         lowmid_band_threshold,
@@ -36,6 +37,7 @@ namespace params {
         lowmid_band_bypass,
         lowmid_band_solo,
         lowmid_band_RCmode,
+        lowmid_band_drive,
 
         highmid_band_threshold,
         highmid_band_ratio,
@@ -45,6 +47,7 @@ namespace params {
         highmid_band_bypass,
         highmid_band_solo,
         highmid_band_RCmode,
+        highmid_band_drive,
 
         high_band_threshold,
         high_band_ratio,
@@ -54,12 +57,12 @@ namespace params {
         high_band_bypass,
         high_band_solo,
         high_band_RCmode,
+        high_band_drive,
 
         low_lowmid_cutoff,
         lowmid_highmid_cutoff,
         highmid_high_cutoff,
 
-        drive,
         dry_wet
     };
 
@@ -75,6 +78,7 @@ namespace params {
             {low_band_bypass, "Lowband Bypass"},
             {low_band_solo, "Lowband Solo"},
             {low_band_RCmode, "Lowband RCMode"},
+            {low_band_drive, "Lowband Drive"},
 
             {lowmid_band_threshold, "Low-Midband Threshold"},
             {lowmid_band_ratio, "Low-Midband Ratio"},
@@ -84,6 +88,7 @@ namespace params {
             {lowmid_band_bypass, "Low-Midband Bypass"},
             {lowmid_band_solo, "Low-Midband Solo"},
             {lowmid_band_RCmode, "Low-Midband RCMode"},
+            {lowmid_band_drive, "Low-Midband Drive"},
             
             {highmid_band_threshold, "High-Midband Threshold"},
             {highmid_band_ratio, "High-Midband Ratio"},
@@ -93,6 +98,7 @@ namespace params {
             {highmid_band_bypass, "High-Midband Bypass"},
             {highmid_band_solo, "High-Midband Solo"},
             {highmid_band_RCmode, "High-Midband RCMode"},
+            {highmid_band_drive, "High-Midband Drive"},
            
             {high_band_threshold, "Highband Threshold"},
             {high_band_ratio, "Highband Ratio"},
@@ -102,12 +108,11 @@ namespace params {
             {high_band_bypass, "Highband Bypass"},
             {high_band_solo, "Highband Solo"},
             {high_band_RCmode, "Highband RCMode"},
+            {high_band_drive, "Highband Drive"},
             
             {low_lowmid_cutoff, "Low-Lowmid-Cutoff"},
             {lowmid_highmid_cutoff, "Lowmid-Highmid-Cutoff"},
             {highmid_high_cutoff, "Highmid-High-Cutoff"},
-
-            {drive, "Drive"},
 
             {dry_wet, "Dry_Wet"}
         };
@@ -164,6 +169,7 @@ public:
     CompressorAudioProcessor();
     ~CompressorAudioProcessor() override;
 
+    void setWaveshaperFunction(int waveshaperIndex, const juce::AudioParameterFloat* driveParam);
     //==============================================================================
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
@@ -226,11 +232,20 @@ private:
     juce::AudioParameterBool* highmid_band_solo{ nullptr };
     juce::AudioParameterBool* high_band_solo{ nullptr };
 
-    juce::AudioParameterFloat* drive{ nullptr };
+    juce::AudioParameterFloat* low_band_drive{ nullptr };
+    juce::AudioParameterFloat* lowmid_band_drive{ nullptr };
+    juce::AudioParameterFloat* highmid_band_drive{ nullptr };
+    juce::AudioParameterFloat* high_band_drive{ nullptr };
     juce::AudioParameterFloat* dry_wet{ nullptr };
 
+    using Waveshaper = juce::dsp::WaveShaper<float, std::function<float(float)>>;
 
-    juce::dsp::WaveShaper<float, std::function<float(float)>> waveshaper;
+    std::array<Waveshaper, 4> waveshapers;
+    Waveshaper& low_waveshaper = waveshapers[0];
+    Waveshaper& lowmid_waveshaper = waveshapers[1];
+    Waveshaper& highmid_waveshaper = waveshapers[2];
+    Waveshaper& high_waveshaper = waveshapers[3];
+
     
 
     juce::AudioBuffer<float> invertedBuffer;

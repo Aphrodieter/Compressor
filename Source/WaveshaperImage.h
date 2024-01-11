@@ -14,7 +14,7 @@
 using namespace juce;
 class WaveshaperImage: public Component {
 public:
-    WaveshaperImage();
+    WaveshaperImage(Colour waveform_color);
 
     void paint(Graphics& g) override;
 
@@ -31,5 +31,6 @@ private:
     std::array<Image, 32> images;
     size_t imageIndex = 0;
     float MAX_DRIVE = 1.0f;
+    Colour waveform_color;
 
 };

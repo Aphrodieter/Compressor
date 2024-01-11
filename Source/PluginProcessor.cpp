@@ -69,7 +69,10 @@ CompressorAudioProcessor::CompressorAudioProcessor()
 	high_compressor.RCMode = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter(stringmap.at(Params::high_band_RCmode)));
 
 
-	drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::drive)));
+	low_band_drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::low_band_drive)));
+	lowmid_band_drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::lowmid_band_drive)));
+	highmid_band_drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::highmid_band_drive)));
+	high_band_drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::high_band_drive)));
 	dry_wet = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::dry_wet)));
 }
 
@@ -139,6 +142,13 @@ void CompressorAudioProcessor::changeProgramName(int index, const juce::String& 
 {
 }
 
+void CompressorAudioProcessor::setWaveshaperFunction(int waveshaperIndex, const juce::AudioParameterFloat* driveParam)
+{
+	waveshapers[waveshaperIndex].functionToUse = [driveParam](float x)
+		{
+			return std::tanh(x * driveParam->get());
+		};
+}
 //==============================================================================
 void CompressorAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
@@ -187,14 +197,34 @@ void CompressorAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBl
 		compressor.prepare(spec);
 	}
 
-
-	waveshaper.prepare(spec);
-	waveshaper.functionToUse = [&](float x)
+	for (auto& waveshaper : waveshapers) {
+		waveshaper.prepare(spec);
+	}
+	
+	/*waveshapers[0].functionToUse = [&](float x)
 		{
-			return std::tanh(x * drive->get());
+			return std::tanh(x * low_band_drive->get());
 		};
+	waveshapers[1].functionToUse = [&](float x)
+		{
+			return std::tanh(x * lowmid_band_drive->get());
+		};
+	waveshapers[2].functionToUse = [&](float x)
+		{
+			return std::tanh(x * highmid_band_drive->get());
+		};
+	waveshapers[3].functionToUse = [&](float x)
+		{
+			return std::tanh(x * high_band_drive->get());
+		};*/
+	setWaveshaperFunction(0, low_band_drive);
+	setWaveshaperFunction(1, lowmid_band_drive);
+	setWaveshaperFunction(2, highmid_band_drive);
+	setWaveshaperFunction(3, high_band_drive);
 
 }
+
+
 
 void CompressorAudioProcessor::releaseResources()
 {
@@ -336,8 +366,12 @@ void CompressorAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 
 	for (int i = 0; i < compressors.size(); i++)
 	{
+		
+		waveshapers[i].process(ctxs[i]);
+
 		compressors[i].updateCompressorSettings();
 		compressors[i].process(ctxs[i]);
+		
 	}
 
 	int n = buffer.getNumSamples();
@@ -455,6 +489,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 		juce::StringArray("Normal RC", "Procentual RC", "Level RC"),
 		0
 	));
+	layout.add(std::make_unique<AudioParameterFloat>(
+		stringmap.at(Params::low_band_drive),
+		stringmap.at(Params::low_band_drive),
+		NormalisableRange<float>(1, 10, 0.1, 1.0f),
+		1
+	));
 
 
 	//lowmid band
@@ -501,6 +541,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 		juce::StringArray("Normal RC", "Procentual RC", "Level RC"),
 		0
 	));
+	layout.add(std::make_unique<AudioParameterFloat>(
+		stringmap.at(Params::lowmid_band_drive),
+		stringmap.at(Params::lowmid_band_drive),
+		NormalisableRange<float>(1, 10, 0.1, 1.0f),
+		1
+	));
 
 	//highmid band
 	layout.add(std::make_unique<AudioParameterFloat>(
@@ -544,6 +590,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 		stringmap.at(Params::highmid_band_RCmode),
 		juce::StringArray("Normal RC", "Procentual RC", "Level RC"),
 		0
+	));
+	layout.add(std::make_unique<AudioParameterFloat>(
+		stringmap.at(Params::highmid_band_drive),
+		stringmap.at(Params::highmid_band_drive),
+		NormalisableRange<float>(1, 10, 0.1, 1.0f),
+		1
 	));
 
 	//high band
@@ -589,6 +641,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 		stringmap.at(Params::high_band_RCmode),
 		juce::StringArray("Normal RC", "Procentual RC", "Level RC"),
 		0
+	));
+	layout.add(std::make_unique<AudioParameterFloat>(
+		stringmap.at(Params::high_band_drive),
+		stringmap.at(Params::high_band_drive),
+		NormalisableRange<float>(1, 10, 0.1, 1.0f),
+		1
 	));
 
 
@@ -639,12 +697,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 	));
 
 
-	layout.add(std::make_unique<AudioParameterFloat>(
-		stringmap.at(Params::drive),
-		stringmap.at(Params::drive),
-		NormalisableRange<float>(1, 10, 0.1, 1.0f),
-		1
-	));
+	
 
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::dry_wet),

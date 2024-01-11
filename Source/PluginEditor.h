@@ -20,6 +20,11 @@ static const juce::Colour BANDCONTROL_COLOR = juce::Colours::burlywood;
 static const juce::Colour GENERALCONTROL_COLOR = juce::Colours::darksalmon;
 static const juce::Colour SATURATIONCONTROL_COLOR = juce::Colours::darkolivegreen;
 
+static const juce::Colour LOW_BAND_COLOR = juce::Colours::darkblue;
+static const juce::Colour LOWMID_BAND_COLOR = juce::Colours::darkcyan;
+static const juce::Colour HIGHMID_BAND_COLOR = juce::Colours::lightcoral;
+static const juce::Colour HIGH_BAND_COLOR = juce::Colours::lightgoldenrodyellow;
+
 
 using namespace juce;
 class BandLookAndFeel : public LookAndFeel_V4
@@ -151,26 +156,54 @@ class SaturationControls : public Component, public Slider::Listener {
 public:
 	SaturationControls(Colour color, AudioProcessorValueTreeState& apvts) : color(color), apvts(apvts)
 	{
+		auto& stringMap = params::getStringMap();
 
 
-		sliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, "Drive", drive.getSlider());
+		makeAttachements("Lowband");
+		
 
-		waveshaperImage.setMaxDrive(drive.getSlider().getMaximum());
+		for (auto& image : waveshaperImages)
+		{
+			image.setMaxDrive(drive.getSlider().getMaximum());
+			addAndMakeVisible(image);
+			image.setVisible(false);
+
+		}
 
 		drive.getSlider().addListener(this);
-		drive.setLookAndFeel(&laf);
+		//drive.setLookAndFeel(&laf);
 		addAndMakeVisible(drive);
-		addAndMakeVisible(waveshaperImage);
+
+		currentImage = &waveshaperImages[0];
+		currentImage->setVisible(true);
 
 
+	}
+
+	void makeAttachements(const String& bandName)
+	{
+		sliderAttachment.reset();
+		auto driveParameter = bandName + " Drive";
+		sliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, driveParameter, drive.getSlider());
+
+
+	}
+
+	void showImage(const int index)
+	{
+		currentImage->setVisible(false);
+		currentImage = &waveshaperImages[index];
+		currentImage->setVisible(true);
+		currentImage->repaint();
+		sliderValueChanged(&drive.getSlider());
 	}
 
 	void sliderValueChanged(Slider* slider) override
 	{
 		DBG(slider->getValue());
-		auto imageN = waveshaperImage.getImageCount();
+		auto imageN = currentImage->getImageCount();
 		auto imageIndex = (slider->getValue() - 1) * imageN / slider->getMaximum();
-		waveshaperImage.setImageIndex(imageIndex);
+		currentImage->setImageIndex(imageIndex);
 	}
 
 	void paint(Graphics& g) override
@@ -196,11 +229,20 @@ public:
 		auto width = bounds.getWidth();
 
 		drive.setBounds(bounds.removeFromBottom(bounds.getHeight() / 2));
-		waveshaperImage.setBounds(bounds.reduced(20, 20));
+		for (auto& image : waveshaperImages)
+		{
+			image.setBounds(bounds.reduced(20, 20));
+		}
 	}
 private:
-	LabelRotarySlider drive{ "D" , 40.0f };
-	WaveshaperImage waveshaperImage;
+	LabelRotarySlider drive{ "Drive" , 30.0f };
+	std::array<WaveshaperImage, 4> waveshaperImages{
+		LOW_BAND_COLOR,
+		LOWMID_BAND_COLOR,
+		HIGHMID_BAND_COLOR,
+		HIGH_BAND_COLOR};
+
+	WaveshaperImage* currentImage;
 	Colour color;
 	AudioProcessorValueTreeState& apvts;
 	std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> sliderAttachment;
@@ -219,7 +261,7 @@ public:
 		}
 
 		makeAttachements(bandName);
-		
+
 
 
 		bypass.setClickingTogglesState(true);
@@ -296,7 +338,7 @@ public:
 		sliderBox.flexDirection = FlexBox::Direction::row;
 		auto bounds = getLocalBounds();
 		height = (float)bounds.getHeight();
-		width = (float)bounds.getWidth() /6;
+		width = (float)bounds.getWidth() / 6;
 
 		for (auto& slider : sliders)
 		{
@@ -310,11 +352,11 @@ public:
 		buttonBox.items.add(FlexItem(RCmode).withFlex(1.0f));//.withWidth(width).withHeight(buttonHeight));
 		buttonBox.items.add(FlexItem(bypass).withFlex(1.0f));
 		buttonBox.items.add(FlexItem(solo).withFlex(1.0f));
-		
+
 		auto sliderWidthPercentage = 0.9;
 
-		container.items.add(FlexItem(sliderBox).withWidth(bounds.getWidth()* sliderWidthPercentage).withHeight(bounds.getHeight()));
-		container.items.add(FlexItem(buttonBox).withWidth(bounds.getWidth() * (1- sliderWidthPercentage)).withHeight(bounds.getHeight()));
+		container.items.add(FlexItem(sliderBox).withWidth(bounds.getWidth() * sliderWidthPercentage).withHeight(bounds.getHeight()));
+		container.items.add(FlexItem(buttonBox).withWidth(bounds.getWidth() * (1 - sliderWidthPercentage)).withHeight(bounds.getHeight()));
 
 		container.performLayout(bounds.reduced(5));
 	}
@@ -412,7 +454,7 @@ using namespace juce;
 class FilterControls : public Component, public TextButton::Listener
 {
 public:
-	FilterControls(const Colour& color, AudioProcessorValueTreeState& apvts, SingleBandControl& singleBand) : apvts(apvts), color(color), singleBand(singleBand)
+	FilterControls(const Colour& color, AudioProcessorValueTreeState& apvts, SingleBandControl& singleBand, SaturationControls& satControls) : apvts(apvts), color(color), singleBand(singleBand), satControls(satControls)
 	{
 		low_selector.setComponentID("Lowband");
 		low_mid_selector.setComponentID("Low-Midband");
@@ -420,6 +462,7 @@ public:
 		high_selector.setComponentID("Highband");
 
 		singleBand.setLookAndFeel(&BandLookAndFeels[0]);
+		satControls.setLookAndFeel(&BandLookAndFeels[0]);
 		for (size_t i = 0; i < bandSelectors.size(); i++)
 		{
 			bandSelectors[i].setRadioGroupId(1);
@@ -449,9 +492,13 @@ public:
 	{
 		auto buttonID = button->getComponentID();
 		singleBand.makeAttachements(buttonID);
-		
+
 
 		singleBand.setLookAndFeel(&BandLookAndFeels[bandNames[buttonID]]);
+
+		satControls.makeAttachements(buttonID);
+		satControls.showImage(bandNames[buttonID]);
+		satControls.setLookAndFeel(&BandLookAndFeels[bandNames[buttonID]]);
 	}
 
 
@@ -500,7 +547,7 @@ private:
 	Slider& lowmid_highmid_crossover = sliders[1];
 	Slider& highmid_high_crossover = sliders[2];
 
-	std::array<TextButton, 4> bandSelectors = { TextButton("Low"), TextButton("Low-Mid"), TextButton("High-Mid"), TextButton("High")};
+	std::array<TextButton, 4> bandSelectors = { TextButton("Low"), TextButton("Low-Mid"), TextButton("High-Mid"), TextButton("High") };
 
 	TextButton& low_selector = bandSelectors[0];
 	TextButton& low_mid_selector = bandSelectors[1];
@@ -523,11 +570,19 @@ private:
 	};
 	Label control_area_text;
 
-	std::array<FilterLookAndFeel, 3> FilterLookAndFeels = { FilterLookAndFeel(juce::Colours::darkblue, juce::Colours::darkcyan), FilterLookAndFeel(juce::Colours::darkcyan,juce::Colours::lightcoral) ,FilterLookAndFeel(juce::Colours::lightcoral,juce::Colours::lightgoldenrodyellow) };
+	std::array<FilterLookAndFeel, 3> FilterLookAndFeels = { {
+		{LOW_BAND_COLOR, LOWMID_BAND_COLOR },
+		{LOWMID_BAND_COLOR, HIGHMID_BAND_COLOR},
+		{HIGHMID_BAND_COLOR,HIGH_BAND_COLOR} } };
 
-	std::array<BandLookAndFeel, 4> BandLookAndFeels = { BandLookAndFeel(juce::Colours::darkblue), BandLookAndFeel(juce::Colours::darkcyan) ,BandLookAndFeel(juce::Colours::lightcoral) ,BandLookAndFeel(juce::Colours::lightgoldenrodyellow) };
+	std::array<BandLookAndFeel, 4> BandLookAndFeels = {
+		LOW_BAND_COLOR,
+		LOWMID_BAND_COLOR ,
+		HIGHMID_BAND_COLOR ,
+		HIGH_BAND_COLOR };
 
 	SingleBandControl& singleBand;
+	SaturationControls& satControls;
 
 	std::map<String, int> bandNames = {
 		{"Lowband", 0},
@@ -542,7 +597,7 @@ using namespace juce;
 class GeneralControls : public Component
 {
 public:
-	GeneralControls(const Colour& color, AudioProcessorValueTreeState& apvts): apvts(apvts), color(color)
+	GeneralControls(const Colour& color, AudioProcessorValueTreeState& apvts) : apvts(apvts), color(color)
 	{
 		auto stringMap = params::getStringMap();
 		sliderAttachement = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, stringMap.at(params::dry_wet), dry_wet.getSlider());
@@ -568,8 +623,8 @@ public:
 	{
 		FlexBox fb;
 		fb.flexDirection = FlexBox::Direction::rowReverse;
-		
-		
+
+
 		fb.items.add(FlexItem(dry_wet).withFlex(1.0f));
 		fb.performLayout(getLocalBounds());
 	}
@@ -577,7 +632,7 @@ public:
 private:
 	AudioProcessorValueTreeState& apvts;
 	const Colour& color;
-	LabelRotarySlider dry_wet{"Dry/Wet", 15.0f};
+	LabelRotarySlider dry_wet{ "Dry/Wet", 15.0f };
 	std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> sliderAttachement;
 	BandLookAndFeel laf{ Colours::black };
 };
@@ -600,10 +655,10 @@ private:
 	// access the processor object that created it.
 	CompressorAudioProcessor& audioProcessor;
 	//CompressorControls compressorControls{ juce::Colours::burlywood, audioProcessor.apvts };
-	SingleBandControl compressorControls{ BANDCONTROL_COLOR, audioProcessor.apvts, "Lowband"};
-	FilterControls filterControls{ FILTERCONTROL_COLOR, audioProcessor.apvts , compressorControls};
-	GeneralControls generalControls{ FILTERCONTROL_COLOR, audioProcessor.apvts};
+	SingleBandControl compressorControls{ BANDCONTROL_COLOR, audioProcessor.apvts, "Lowband" };
 	SaturationControls saturationControls{ BANDCONTROL_COLOR, audioProcessor.apvts };
+	FilterControls filterControls{ FILTERCONTROL_COLOR, audioProcessor.apvts , compressorControls, saturationControls };
+	GeneralControls generalControls{ FILTERCONTROL_COLOR, audioProcessor.apvts };
 
 
 

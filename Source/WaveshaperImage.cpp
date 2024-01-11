@@ -78,7 +78,7 @@ void WaveshaperImage::createImage(size_t i, Rectangle<int> bounds, float drive)
 	path.lineTo(0, zeroCrossing);
 	path.closeSubPath();
 
-	g.setColour(juce::Colours::green);
+	g.setColour(waveform_color);
 	g.fillPath(path);
 
 	g.setColour(juce::Colours::black);
@@ -87,7 +87,7 @@ void WaveshaperImage::createImage(size_t i, Rectangle<int> bounds, float drive)
 
 
 using namespace juce;
-WaveshaperImage::WaveshaperImage()
+WaveshaperImage::WaveshaperImage(Colour color): waveform_color(color)
 {
 
 }
