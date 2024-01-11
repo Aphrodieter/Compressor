@@ -15,15 +15,15 @@
 //==============================================================================
 /**
 */
-static const juce::Colour FILTERCONTROL_COLOR = juce::Colours::darkolivegreen;
-static const juce::Colour BANDCONTROL_COLOR = juce::Colours::burlywood;
+static const juce::Colour FILTERCONTROL_COLOR = { 64, 97, 73 };//juce::Colours::darkolivegreen;
+static const juce::Colour BANDCONTROL_COLOR = { 108, 115, 80 };// juce::Colours::burlywood;
 static const juce::Colour GENERALCONTROL_COLOR = juce::Colours::darksalmon;
 static const juce::Colour SATURATIONCONTROL_COLOR = juce::Colours::darkolivegreen;
 
-static const juce::Colour LOW_BAND_COLOR = juce::Colours::darkblue;
-static const juce::Colour LOWMID_BAND_COLOR = juce::Colours::darkcyan;
-static const juce::Colour HIGHMID_BAND_COLOR = juce::Colours::lightcoral;
-static const juce::Colour HIGH_BAND_COLOR = juce::Colours::lightgoldenrodyellow;
+static const juce::Colour LOW_BAND_COLOR = { 29, 130, 181 };// juce::Colours::darkblue;
+static const juce::Colour LOWMID_BAND_COLOR = { 181, 110, 29 };// juce::Colours::darkcyan;
+static const juce::Colour HIGHMID_BAND_COLOR = { 181, 29, 29 };// juce::Colours::lightcoral;
+static const juce::Colour HIGH_BAND_COLOR = { 181, 181, 29 };// juce::Colours::lightgoldenrodyellow;
 
 
 using namespace juce;
