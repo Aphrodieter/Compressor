@@ -360,7 +360,7 @@ public:
 		auto sliderWidthPercentage = 0.9;
 
 		container.items.add(FlexItem(sliderBox).withWidth(bounds.getWidth() * sliderWidthPercentage).withHeight(bounds.getHeight()));
-		container.items.add(FlexItem(buttonBox).withWidth(bounds.getWidth() * (1 - sliderWidthPercentage)).withHeight(bounds.getHeight()));
+		container.items.add(FlexItem(buttonBox).withWidth(bounds.getWidth() * (1 - sliderWidthPercentage)).withHeight(bounds.getHeight()*0.95));
 
 		container.performLayout(bounds.reduced(5));
 	}
