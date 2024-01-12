@@ -22,7 +22,7 @@ static const juce::Colour SATURATIONCONTROL_COLOR = juce::Colours::darkolivegree
 
 static const juce::Colour LOW_BAND_COLOR = { 29, 130, 181 };// juce::Colours::darkblue;
 static const juce::Colour LOWMID_BAND_COLOR = { 181, 110, 29 };// juce::Colours::darkcyan;
-static const juce::Colour HIGHMID_BAND_COLOR = { 181, 29, 29 };// juce::Colours::lightcoral;
+static const juce::Colour HIGHMID_BAND_COLOR = { 105, 13, 34 };// juce::Colours::lightcoral;
 static const juce::Colour HIGH_BAND_COLOR = { 181, 181, 29 };// juce::Colours::lightgoldenrodyellow;
 
 
@@ -326,7 +326,11 @@ public:
 		auto bounds = getLocalBounds();
 		g.setColour(juce::Colours::black);
 		g.fillAll();
-		bounds.reduce(5, 0);
+		int borderWidth = 5;
+		bounds.removeFromTop(borderWidth);
+		bounds.removeFromLeft(borderWidth);
+		bounds.removeFromRight(borderWidth);
+		//bounds.reduce(5, 0);
 		g.setColour(color);
 
 		g.fillRoundedRectangle(bounds.toFloat(), 5);
