@@ -105,8 +105,7 @@ void MyCompressor<SampleType>::reset()
 template <typename SampleType>
 SampleType MyCompressor<SampleType>::processSample(int channel, SampleType inputValue)
 {
-    
-    auto x_g = juce::Decibels::gainToDecibels(inputValue, minus_inf);
+    auto x_g = juce::Decibels::gainToDecibels(std::abs(inputValue), minus_inf);
     auto y_g = (x_g < thresholddB) ? x_g : thresholddB + ((x_g - thresholddB) / ratio);
 
     auto x_l = x_g - y_g;
