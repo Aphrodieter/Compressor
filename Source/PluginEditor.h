@@ -25,6 +25,9 @@ static const juce::Colour LOWMID_BAND_COLOR = { 181, 110, 29 };// juce::Colours:
 static const juce::Colour HIGHMID_BAND_COLOR = { 105, 13, 34 };// juce::Colours::lightcoral;
 static const juce::Colour HIGH_BAND_COLOR = { 181, 181, 29 };// juce::Colours::lightgoldenrodyellow;
 
+static const juce::Colour SLIDER_KNOB_COLOR = { 102, 58, 24 };
+
+
 
 using namespace juce;
 class BandLookAndFeel : public LookAndFeel_V4
@@ -35,7 +38,7 @@ public:
 		Colour transparent = Colour::Colour(0.0f, 0.0f, 0.0f, 0.0f);
 		setColour(Slider::ColourIds::rotarySliderFillColourId, color);
 		setColour(Slider::ColourIds::textBoxOutlineColourId, transparent);
-
+		setColour(Slider::ColourIds::thumbColourId, color);
 		setColour(Slider::ColourIds::textBoxTextColourId, Colours::black);
 
 
