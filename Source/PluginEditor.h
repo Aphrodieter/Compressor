@@ -497,6 +497,13 @@ public:
 		dry_wet_slider.setLookAndFeel(&generalControlLaf);
 		addAndMakeVisible(dry_wet_slider);
 
+		external_sidechain_button.setClickingTogglesState(true);
+		external_sidechain_button_attachement =std::make_unique<AudioProcessorValueTreeState::ButtonAttachment>(apvts,  stringMap.at(params::external_sidechain), external_sidechain_button);
+
+		external_sidechain_button.setColour(TextButton::ColourIds::buttonOnColourId, Colours::yellowgreen);
+
+		addAndMakeVisible(external_sidechain_button);
+
 	}
 
 	void buttonClicked(Button* button) override
@@ -555,7 +562,12 @@ public:
 		generalControlBox.items.add(FlexItem(dry_wet_slider).withFlex(1.0f));
 		generalControlBox.performLayout(bounds.removeFromBottom(bounds.getHeight()/2));*/
 
-		dry_wet_slider.setBounds(bounds.removeFromRight(bounds.getWidth() / 5).removeFromBottom(bounds.getHeight() / 1.5));
+		auto drywetSlider_size = bounds.getHeight() - 70;
+		dry_wet_slider.setBounds(bounds.getWidth() - drywetSlider_size, bounds.getHeight()/2, drywetSlider_size, drywetSlider_size);
+
+
+		auto sidechain_button_size = 40;
+		external_sidechain_button.setBounds(5, bounds.getHeight()-5, sidechain_button_size, sidechain_button_size);
 
 		auto text = control_area_text.getText();
 		auto font = control_area_text.getFont();
@@ -565,6 +577,7 @@ public:
 	}
 private:
 	LabelRotarySlider dry_wet_slider{ "Dry/Wet", 15.0f };
+	TextButton external_sidechain_button{ "SC" };
 
 	std::array<Slider, 3> sliders;
 	Slider& low_lowmid_crossover = sliders[0];
@@ -580,6 +593,8 @@ private:
 
 	std::array<std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment>, 3> attachements;
 	std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> dryWetAttachement;
+	std::unique_ptr<AudioProcessorValueTreeState::ButtonAttachment> external_sidechain_button_attachement;
+
 
 	std::array<String, 3> paramNames = { "Low-Lowmid-Cutoff", "Lowmid-Highmid-Cutoff","Highmid-High-Cutoff" };
 

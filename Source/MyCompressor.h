@@ -57,6 +57,8 @@ public:
 
     void setMakeup(SampleType makeup);
 
+    void setExternalSidechainMode(bool sidechain);
+
     //==============================================================================
     /** Initialises the processor. */
     void prepare(const juce::dsp::ProcessSpec& spec);
@@ -67,15 +69,19 @@ public:
     //==============================================================================
     /** Processes the input and output samples supplied in the processing context. */
     template <typename ProcessContext>
-    void process(const ProcessContext& context) noexcept
+    void process(const ProcessContext& context, const ProcessContext& sidechainContext) noexcept
     {
         const auto& inputBlock = context.getInputBlock();
+        const auto& sidechainBlock = sidechainContext.getInputBlock();
         auto& outputBlock = context.getOutputBlock();
         const auto numChannels = outputBlock.getNumChannels();
         const auto numSamples = outputBlock.getNumSamples();
 
         jassert(inputBlock.getNumChannels() == numChannels);
         jassert(inputBlock.getNumSamples() == numSamples);
+        jassert(sidechainBlock.getNumChannels() == numChannels);
+        jassert(sidechainBlock.getNumSamples() == numSamples);
+        
 
         if (context.isBypassed)
         {
@@ -86,18 +92,19 @@ public:
         for (size_t channel = 0; channel < numChannels; ++channel)
         {
             auto* inputSamples = inputBlock.getChannelPointer(channel);
+            auto* sidechainSamples = sidechainBlock.getChannelPointer(channel);
             auto* outputSamples = outputBlock.getChannelPointer(channel);
 
             for (size_t i = 0; i < numSamples; ++i)
             {
-                outputSamples[i] = processSample((int)channel, inputSamples[i]);
+                outputSamples[i] = processSample((int)channel, inputSamples[i], sidechainSamples[i]);
             }
           
         }
     }
 
     /** Performs the processing operation on a single sample at a time. */
-    SampleType processSample(int channel, SampleType inputValue);
+    SampleType processSample(int channel, SampleType inputValue, SampleType sidechainValue);
 
     void setRCMode(int mode);
 
@@ -108,6 +115,7 @@ private:
     //==============================================================================
     SampleType threshold, thresholdInverse, ratioInverse;
     MyEnvelopeDetector<SampleType> envelopeFilter;
+    bool external_sidechain{ false };
 
     SampleType minus_inf = static_cast<SampleType> (-200.0);
 

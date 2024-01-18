@@ -63,7 +63,8 @@ namespace params {
         lowmid_highmid_cutoff,
         highmid_high_cutoff,
 
-        dry_wet
+        dry_wet,
+        external_sidechain
     };
 
     static const std::map<Params, juce::String> getStringMap()
@@ -114,7 +115,8 @@ namespace params {
             {lowmid_highmid_cutoff, "Lowmid-Highmid-Cutoff"},
             {highmid_high_cutoff, "Highmid-High-Cutoff"},
 
-            {dry_wet, "Dry_Wet"}
+            {dry_wet, "Dry_Wet"},
+            {external_sidechain, "External_Sidechain"}
         };
 
         return map;
@@ -145,17 +147,22 @@ class Compressorband
             compressor.setRCMode(RCMode->getIndex());
         }
 
+        void setSidechainMode(bool sidechain)
+        {
+            compressor.setExternalSidechainMode(sidechain);
+        }
+
         void prepare(const juce::dsp::ProcessSpec& spec)
         {
             compressor.prepare(spec);
         }
 
 
-        void process(juce::dsp::ProcessContextReplacing<float>& context)
+        void process(juce::dsp::ProcessContextReplacing<float>& context, juce::dsp::ProcessContextReplacing<float>& sidechainContext)
         {
             if (bypass->get())
                 context.isBypassed = true;
-            compressor.process(context);
+            compressor.process(context, sidechainContext);
         }
 };
 
@@ -236,7 +243,9 @@ private:
     juce::AudioParameterFloat* lowmid_band_drive{ nullptr };
     juce::AudioParameterFloat* highmid_band_drive{ nullptr };
     juce::AudioParameterFloat* high_band_drive{ nullptr };
+
     juce::AudioParameterFloat* dry_wet{ nullptr };
+    juce::AudioParameterBool* external_sidechain{ nullptr };
 
     using Waveshaper = juce::dsp::WaveShaper<float, std::function<float(float)>>;
 
@@ -252,6 +261,9 @@ private:
     std::array<juce::AudioBuffer<float>, 4> buffers;
     juce::AudioBuffer<float> dryBuffer;
     std::array<juce::AudioBuffer<float>, 4> dryBuffers;
+
+    juce::dsp::Oversampling<float> oversampling{ 2, 4, juce::dsp::Oversampling<float>::FilterType::filterHalfBandPolyphaseIIR };
+
 
     
 

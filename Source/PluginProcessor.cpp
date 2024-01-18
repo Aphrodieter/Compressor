@@ -19,6 +19,7 @@ CompressorAudioProcessor::CompressorAudioProcessor()
 		#endif
 		.withOutput("Output", juce::AudioChannelSet::stereo(), true)
 		#endif
+		.withInput("Sidechain", juce::AudioChannelSet::stereo(), true)
 	)
 	#endif
 {
@@ -73,7 +74,10 @@ CompressorAudioProcessor::CompressorAudioProcessor()
 	lowmid_band_drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::lowmid_band_drive)));
 	highmid_band_drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::highmid_band_drive)));
 	high_band_drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::high_band_drive)));
+
 	dry_wet = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::dry_wet)));
+	external_sidechain = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::external_sidechain)));
+
 }
 
 CompressorAudioProcessor::~CompressorAudioProcessor()
@@ -271,6 +275,7 @@ void CompressorAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 {
 	juce::ScopedNoDenormals noDenormals;
 	auto totalNumInputChannels = getTotalNumInputChannels();
+	DBG(totalNumInputChannels);
 	auto totalNumOutputChannels = getTotalNumOutputChannels();
 
 	// In case we have more outputs than inputs, this code clears any output
@@ -282,10 +287,17 @@ void CompressorAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 	for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
 		buffer.clear(i, 0, buffer.getNumSamples());
 
+	auto mainBus = getBus(true, 0);
+	auto mainBuffer = mainBus->getBusBuffer(buffer);
+	auto sidechainBus = getBus(true, 1);
+	auto sidechainBuffer = sidechainBus->getBusBuffer(buffer);
+	auto sidechainBlock = juce::dsp::AudioBlock<float>(sidechainBuffer);
+	auto sidechainContext = juce::dsp::ProcessContextReplacing<float>(sidechainBlock);
 
+	
 
-	buffers[0] = buffer;
-	buffers[1] = buffer;
+	buffers[0] = mainBuffer;
+	buffers[1] = mainBuffer;
 
 	auto block0 = juce::dsp::AudioBlock<float>(buffers[0]);
 	auto block1 = juce::dsp::AudioBlock<float>(buffers[1]);
@@ -318,7 +330,7 @@ void CompressorAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 	invertedAP2.setCutoffFrequency(cutoff_lowmid_highmid);
 	invertedAP3.setCutoffFrequency(cutoff_highmid_high);
 
-	invertedBuffer.makeCopyOf(buffer);
+	invertedBuffer.makeCopyOf(mainBuffer);
 	auto invertedBlock = juce::dsp::AudioBlock<float>(invertedBuffer);
 	auto invertedContext = juce::dsp::ProcessContextReplacing<float>(invertedBlock);
 
@@ -366,23 +378,25 @@ void CompressorAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 
 	for (int i = 0; i < compressors.size(); i++)
 	{
-		
+		oversampling.processSamplesUp(ctxs[i].getInputBlock());
 		waveshapers[i].process(ctxs[i]);
+		oversampling.processSamplesDown(ctxs[i].getOutputBlock());
 
 		compressors[i].updateCompressorSettings();
-		compressors[i].process(ctxs[i]);
+		compressors[i].setSidechainMode(external_sidechain->get());
+		compressors[i].process(ctxs[i], sidechainContext);
 		
 	}
 
-	int n = buffer.getNumSamples();
-	int channel_n = buffer.getNumChannels();
+	int n = mainBuffer.getNumSamples();
+	int channel_n = mainBuffer.getNumChannels();
 
 	std::array<bool, 4> solos = { low_band_solo->get(), lowmid_band_solo->get(),  highmid_band_solo->get(), high_band_solo->get() };
 
 	auto wetAmount = dry_wet->get();
 	auto dryAmount = 1 - wetAmount;
 
-	buffer.clear();
+	mainBuffer.clear();
 
 	for (int j = 0; j < buffers.size(); j++) {
 		buffers[j].applyGain(wetAmount);
@@ -390,14 +404,14 @@ void CompressorAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 		for (int i = 0; i < channel_n; i++)
 		{
 			if (solos[j] || !anyOtherBandSoloed(solos)) {
-				buffer.addFrom(i, 0, buffers[j], i, 0, n);
-				buffer.addFrom(i, 0, dryBuffers[j], i, 0, n);
+				mainBuffer.addFrom(i, 0, buffers[j], i, 0, n);
+				mainBuffer.addFrom(i, 0, dryBuffers[j], i, 0, n);
 			}
 		}
 	}
 
 
-	auto bl = juce::dsp::AudioBlock<float>(buffer);
+	auto bl = juce::dsp::AudioBlock<float>(mainBuffer);
 	auto ctx = juce::dsp::ProcessContextReplacing<float>(bl);
 	//waveshaper.process(ctx);
 	//perform null test
@@ -704,6 +718,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 		stringmap.at(Params::dry_wet),
 		NormalisableRange<float>(0, 1, 0.01, 1.0f),
 		1
+	));
+
+	layout.add(std::make_unique<AudioParameterBool>(
+		stringmap.at(Params::external_sidechain),
+		stringmap.at(Params::external_sidechain),
+		false
 	));
 
 

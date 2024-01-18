@@ -79,6 +79,12 @@ void MyCompressor<SampleType>::setMakeup(SampleType makeup) {
     update();
 }
 
+template <typename SampleType>
+void MyCompressor<SampleType>::setExternalSidechainMode(bool sidechain) {
+    external_sidechain = sidechain;
+    update();
+}
+
 
 //==============================================================================
 template <typename SampleType>
@@ -103,9 +109,13 @@ void MyCompressor<SampleType>::reset()
 
 //==============================================================================
 template <typename SampleType>
-SampleType MyCompressor<SampleType>::processSample(int channel, SampleType inputValue)
+SampleType MyCompressor<SampleType>::processSample(int channel, SampleType inputValue, SampleType sidechainValue)
 {
-    auto x_g = juce::Decibels::gainToDecibels(std::abs(inputValue), minus_inf);
+    SampleType x_g;
+    if (external_sidechain)
+        x_g = juce::Decibels::gainToDecibels(std::abs(sidechainValue), minus_inf);
+    else
+        x_g = juce::Decibels::gainToDecibels(std::abs(inputValue), minus_inf);
     auto y_g = (x_g < thresholddB) ? x_g : thresholddB + ((x_g - thresholddB) / ratio);
 
     auto x_l = x_g - y_g;
