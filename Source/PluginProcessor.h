@@ -158,11 +158,11 @@ class Compressorband
         }
 
 
-        void process(juce::dsp::ProcessContextReplacing<float>& context, juce::dsp::ProcessContextReplacing<float>& sidechainContext)
+        void process(juce::dsp::ProcessContextReplacing<float>& context, juce::AudioBuffer<float>& sidechainBuffer)
         {
             if (bypass->get())
                 context.isBypassed = true;
-            compressor.process(context, sidechainContext);
+            compressor.process(context, sidechainBuffer);
         }
 };
 

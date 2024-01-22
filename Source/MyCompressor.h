@@ -69,18 +69,16 @@ public:
     //==============================================================================
     /** Processes the input and output samples supplied in the processing context. */
     template <typename ProcessContext>
-    void process(const ProcessContext& context, const ProcessContext& sidechainContext) noexcept
+    void process(const ProcessContext& context, const juce::AudioBuffer<float>& sidechainBuffer) noexcept
     {
         const auto& inputBlock = context.getInputBlock();
-        const auto& sidechainBlock = sidechainContext.getInputBlock();
         auto& outputBlock = context.getOutputBlock();
         const auto numChannels = outputBlock.getNumChannels();
         const auto numSamples = outputBlock.getNumSamples();
 
         jassert(inputBlock.getNumChannels() == numChannels);
         jassert(inputBlock.getNumSamples() == numSamples);
-        jassert(sidechainBlock.getNumChannels() == numChannels);
-        jassert(sidechainBlock.getNumSamples() == numSamples);
+        jassert(sidechainBuffer.getNumSamples() == numSamples);
         
 
         if (context.isBypassed)
@@ -92,7 +90,7 @@ public:
         for (size_t channel = 0; channel < numChannels; ++channel)
         {
             auto* inputSamples = inputBlock.getChannelPointer(channel);
-            auto* sidechainSamples = sidechainBlock.getChannelPointer(channel);
+            auto* sidechainSamples = sidechainBuffer.getReadPointer(channel);
             auto* outputSamples = outputBlock.getChannelPointer(channel);
 
             for (size_t i = 0; i < numSamples; ++i)
