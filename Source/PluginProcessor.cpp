@@ -15,11 +15,12 @@ CompressorAudioProcessor::CompressorAudioProcessor()
 	: AudioProcessor(BusesProperties()
 		#if ! JucePlugin_IsMidiEffect
 		#if ! JucePlugin_IsSynth
-		.withInput("Input", juce::AudioChannelSet::stereo(), true)
+		.withInput("Input", juce::AudioChannelSet::stereo())
 		#endif
-		.withOutput("Output", juce::AudioChannelSet::stereo(), true)
+		.withInput("Sidechain", juce::AudioChannelSet::stereo())
+		.withOutput("Output", juce::AudioChannelSet::stereo())
 		#endif
-		.withInput("Sidechain", juce::AudioChannelSet::stereo(), true)
+		
 	)
 	#endif
 {
@@ -287,13 +288,10 @@ void CompressorAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 	for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
 		buffer.clear(i, 0, buffer.getNumSamples());
 
-	auto mainBus = getBus(true, 0);
-	auto mainBuffer = mainBus->getBusBuffer(buffer);
-	auto sidechainBus = getBus(true, 1);
-	auto sidechainBuffer = sidechainBus->getBusBuffer(buffer);
+	auto mainBuffer = getBusBuffer(buffer, true, 0);
+	auto sidechainBuffer = getBusBuffer(buffer, true, 1);
 	auto sidechainBlock = juce::dsp::AudioBlock<float>(sidechainBuffer);
 	auto sidechainContext = juce::dsp::ProcessContextReplacing<float>(sidechainBlock);
-
 	
 
 	buffers[0] = mainBuffer;
@@ -413,6 +411,8 @@ void CompressorAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 
 	auto bl = juce::dsp::AudioBlock<float>(mainBuffer);
 	auto ctx = juce::dsp::ProcessContextReplacing<float>(bl);
+
+	//buffer = mainBuffer;
 	//waveshaper.process(ctx);
 	//perform null test
 	/*if (low_compressor.bypass->get())
