@@ -65,7 +65,7 @@
           uiLastY_Normal="447" uiopen_Normal="1">
     <PLUGIN name="AudioFilePlayer" format="VST3" category="Fx" manufacturer="Matkat Music LLC"
             version="1.0.0" file="C:\Program Files\Common Files\VST3\AudioFilePlayer.vst3\Contents\x86_64-win\AudioFilePlayer.vst3"
-            uniqueId="79fe81c" isInstrument="0" fileTime="18af54f3bb3" infoUpdateTime="18d32bb4c04"
+            uniqueId="79fe81c" isInstrument="0" fileTime="18af54f3bb3" infoUpdateTime="18d32e706f5"
             numInputs="2" numOutputs="2" isShell="0" hasARAExtension="0"
             uid="e95d02c7"/>
     <STATE>338.VMjLgjT....O+fWarAhckI2bo8la8HRLt.iHfTlai8FYo41Y8HRUTYTK3HxO9.BOVMEUy.Ea0cVZtMEcgQWY9vSRC8Vav8lak4Fc9DiM43BTIISX1UEaho2ZVkUdAAkKAwDUigWRWkEcQ0VTucmUY4BQPQUQLolShUELhsVRxHlXMYTXqAiUYIFLTMVdqECVhUEQi4VUrIlL3DSXpEjTKYFRTkUaqwVXlgDUjYlcTkkdQckVzMlQHcDNFgzbtf2TrkkUZk1ZVgkbAgVUuEkUYUWPRsjYLkFS1MiTgYWSC4hKt3hKt3hKt3hKt3hRUACTEEzZh8VVWgkdUYTTmE0UX4BQP4hPqcjXm0jLh4BQP4xPt.0Qt3hKt3hKt3hKtQUUCUEQTg2ZrM1YQcUVDUjQicVP77RRC8Vav8lak4Fc9vyKVMEUy.Ea0cVZtMEcgQWY9..</STATE>
@@ -79,10 +79,10 @@
     </LAYOUT>
   </FILTER>
   <FILTER uid="7" x="0.5338855421686747" y="0.5084485407066052" useARA="0"
-          uiLastX_Normal="333" uiLastY_Normal="171" uiopen_Normal="0">
+          uiLastX_Normal="233" uiLastY_Normal="136" uiopen_Normal="1">
     <PLUGIN name="Compressor" format="VST3" category="Fx" manufacturer="TonSohn"
             version="1.0.0" file="C:\Program Files\Common Files\VST3\Compressor.vst3\Contents\x86_64-win\Compressor.vst3"
-            uniqueId="5a7e7ee" isInstrument="0" fileTime="18d32b4a5fe" infoUpdateTime="18d32bb4c05"
+            uniqueId="5a7e7ee" isInstrument="0" fileTime="18d32e09133" infoUpdateTime="18d32e706f6"
             numInputs="4" numOutputs="2" isShell="0" hasARAExtension="0"
             uid="e95c37e3"/>
     <STATE>191.VMjLgXK....O+fWarAhckI2bo8la8HRLt.iHfTlai8FYo41Y8HRUTYTK3HxO9.BOVMEUy.Ea0cVZtMEcgQWY9vSRC8Vav8lak4Fc9XCLt3hKt3hKt3hKt3hYRUUSTEETIckVwTjQisVTTgkdEYjKAQjYPQSPWgUdMcjKAQjct3hdA4hKt3hKt3hKtnTUv.UQAslXuk0UXoWUFE0YQcEV77RRC8Vav8lak4Fc9vyKVMEUy.Ea0cVZtMEcgQWY9..</STATE>
@@ -100,7 +100,7 @@
           uiLastY_Normal="412" uiopen_Normal="1">
     <PLUGIN name="AudioFilePlayer" format="VST3" category="Fx" manufacturer="Matkat Music LLC"
             version="1.0.0" file="C:\Program Files\Common Files\VST3\AudioFilePlayer.vst3\Contents\x86_64-win\AudioFilePlayer.vst3"
-            uniqueId="79fe81c" isInstrument="0" fileTime="18af54f3bb3" infoUpdateTime="18d32bb4c05"
+            uniqueId="79fe81c" isInstrument="0" fileTime="18af54f3bb3" infoUpdateTime="18d32e706f6"
             numInputs="2" numOutputs="2" isShell="0" hasARAExtension="0"
             uid="e95d02c7"/>
     <STATE>446.VMjLgTa....O+fWarAhckI2bo8la8HRLt.iHfTlai8FYo41Y8HRUTYTK3HxO9.BOVMEUy.Ea0cVZtMEcgQWY9vSRC8Vav8lak4Fc9HSMv3BTIISX1UEaho2ZVkUdAAkKAwDUigWRWkEcQ0VTucmUY4BQl4VQXolShUjZXIWUFMVczXzUU0zUYgWPBM0aIwlXmkzUjIVSUg0bAcTXq0zQWM0ZrEVa3XUXmMmUYgWSxbUPMczX3UjQgUVPvHFMQ0lXmQSLXsFNqEEL2YTXk8VUZY2cvP0azDSV0AiUXEWUrIVd3TET4EUahc1cwbETMcEY5kzUXQWSVkUYmgVTvbmQgU1aUokcqIzUSUDQTQENEEEdUcUXkcmdgUWPxHlXMUETPEELWcGSC4TYIQDUMgyZQAycFEVYQolXv.SLWwDNwDlc3rFSvLCdicVVG4hKt3hKt3hKt3hKt3hRUACTEEzZh8VVWgkdUYTTmE0UX4BQP4hPqcjXm0jLh4BQP4xPt.0Qt3hKt3hKt3hKtQUUCUEQTg2ZrM1YQcUVDUjQicVP77RRC8Vav8lak4Fc9vyKVMEUy.Ea0cVZtMEcgQWY9..</STATE>
@@ -117,6 +117,8 @@
   <CONNECTION srcFilter="6" srcChannel="1" dstFilter="7" dstChannel="1"/>
   <CONNECTION srcFilter="7" srcChannel="0" dstFilter="3" dstChannel="0"/>
   <CONNECTION srcFilter="7" srcChannel="1" dstFilter="3" dstChannel="1"/>
+  <CONNECTION srcFilter="8" srcChannel="0" dstFilter="3" dstChannel="0"/>
+  <CONNECTION srcFilter="8" srcChannel="1" dstFilter="3" dstChannel="1"/>
   <CONNECTION srcFilter="8" srcChannel="0" dstFilter="7" dstChannel="2"/>
   <CONNECTION srcFilter="8" srcChannel="1" dstFilter="7" dstChannel="3"/>
 </FILTERGRAPH>

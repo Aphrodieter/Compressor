@@ -289,9 +289,10 @@ void CompressorAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 		buffer.clear(i, 0, buffer.getNumSamples());
 
 	auto mainBuffer = getBusBuffer(buffer, true, 0);
-	auto sidechainBuffer = getBusBuffer(buffer, true, 1);
-	auto sidechainBlock = juce::dsp::AudioBlock<float>(sidechainBuffer);
-	auto sidechainContext = juce::dsp::ProcessContextReplacing<float>(sidechainBlock);
+	auto sidechainIndex = totalNumInputChannels > 2 ? 1 : 0;
+	auto sidechainBuffer = getBusBuffer(buffer, true, sidechainIndex);
+	/*auto sidechainBlock = juce::dsp::AudioBlock<float>(sidechainBuffer);
+	auto sidechainContext = juce::dsp::ProcessContextReplacing<float>(sidechainBlock);*/
 	
 
 	buffers[0] = mainBuffer;
@@ -382,7 +383,7 @@ void CompressorAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 
 		compressors[i].updateCompressorSettings();
 		compressors[i].setSidechainMode(external_sidechain->get());
-		compressors[i].process(ctxs[i], sidechainContext);
+		compressors[i].process(ctxs[i], sidechainBuffer);
 		
 	}
 
