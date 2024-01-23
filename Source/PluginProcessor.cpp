@@ -461,36 +461,46 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 
 	using namespace params;
 
+	auto threshold_range = NormalisableRange<float>(-60, 12, 1, 1);
+	auto ratio_range = NormalisableRange<float>(1, 100, 0.5f, 0.2f);
+	auto attack_range = NormalisableRange<float>(5, 500, 1, 1);
+	auto release_range = NormalisableRange<float>(5, 500, 1, 1);
+	auto makeup_range = NormalisableRange<float>(-120, 36, 0.5f, 2.65f);
+
+
+	auto RC_choices = juce::StringArray("Normal RC", "Procentual RC", "Level RC");
+	auto drive_range = NormalisableRange<float>(1, 10, 0.1, 1.0f);
+
 	//lowband
 
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::low_band_threshold),
 		stringmap.at(Params::low_band_threshold),
-		NormalisableRange<float>(-60, 12, 1, 1),
+		threshold_range,
 		0));
 
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::low_band_ratio),
 		stringmap.at(Params::low_band_ratio),
-		NormalisableRange<float>(1, 100, 0.5f, 0.2f),
+		ratio_range,
 		4));
 
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::low_band_attack),
 		stringmap.at(Params::low_band_attack),
-		NormalisableRange<float>(5, 500, 1, 1),
+		attack_range,
 		5));
 
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::low_band_release),
 		stringmap.at(Params::low_band_release),
-		NormalisableRange<float>(5, 500, 1, 1),
+		release_range,
 		200));
 
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::low_band_makeup),
 		stringmap.at(Params::low_band_makeup),
-		NormalisableRange<float>(-120, 36, 0.5f, 2.65f),
+		makeup_range,
 		0));
 
 	layout.add(std::make_unique<AudioParameterBool>(
@@ -502,13 +512,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 	layout.add(std::make_unique<AudioParameterChoice>(
 		stringmap.at(Params::low_band_RCmode),
 		stringmap.at(Params::low_band_RCmode),
-		juce::StringArray("Normal RC", "Procentual RC", "Level RC"),
+		RC_choices,
 		0
 	));
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::low_band_drive),
 		stringmap.at(Params::low_band_drive),
-		NormalisableRange<float>(1, 10, 0.1, 1.0f),
+		drive_range,
 		1
 	));
 
@@ -518,31 +528,31 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::lowmid_band_threshold),
 		stringmap.at(Params::lowmid_band_threshold),
-		NormalisableRange<float>(-60, 12, 1, 1),
+		threshold_range,
 		0));
 
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::lowmid_band_ratio),
 		stringmap.at(Params::lowmid_band_ratio),
-		NormalisableRange<float>(1, 100, 0.5f, 0.2f),
+		ratio_range,
 		4));
 
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::lowmid_band_attack),
 		stringmap.at(Params::lowmid_band_attack),
-		NormalisableRange<float>(5, 500, 1, 1),
+		attack_range,
 		5));
 
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::lowmid_band_release),
 		stringmap.at(Params::lowmid_band_release),
-		NormalisableRange<float>(5, 500, 1, 1),
+		release_range,
 		200));
 
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::lowmid_band_makeup),
 		stringmap.at(Params::lowmid_band_makeup),
-		NormalisableRange<float>(-120, 36, 0.5f, 2.65f),
+		makeup_range,
 		0));
 
 	layout.add(std::make_unique<AudioParameterBool>(
@@ -554,13 +564,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 	layout.add(std::make_unique<AudioParameterChoice>(
 		stringmap.at(Params::lowmid_band_RCmode),
 		stringmap.at(Params::lowmid_band_RCmode),
-		juce::StringArray("Normal RC", "Procentual RC", "Level RC"),
+		RC_choices,
 		0
 	));
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::lowmid_band_drive),
 		stringmap.at(Params::lowmid_band_drive),
-		NormalisableRange<float>(1, 10, 0.1, 1.0f),
+		drive_range,
 		1
 	));
 
@@ -568,31 +578,31 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::highmid_band_threshold),
 		stringmap.at(Params::highmid_band_threshold),
-		NormalisableRange<float>(-60, 12, 1, 1),
+		threshold_range,
 		0));
 
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::highmid_band_ratio),
 		stringmap.at(Params::highmid_band_ratio),
-		NormalisableRange<float>(1, 100, 0.5f, 0.2f),
+		ratio_range,
 		4));
 
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::highmid_band_attack),
 		stringmap.at(Params::highmid_band_attack),
-		NormalisableRange<float>(5, 500, 1, 1),
+		attack_range,
 		5));
 
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::highmid_band_release),
 		stringmap.at(Params::highmid_band_release),
-		NormalisableRange<float>(5, 500, 1, 1),
+		release_range,
 		200));
 
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::highmid_band_makeup),
 		stringmap.at(Params::highmid_band_makeup),
-		NormalisableRange<float>(-120, 36, 0.5f, 2.65f),
+		makeup_range,
 		0));
 
 	layout.add(std::make_unique<AudioParameterBool>(
@@ -604,13 +614,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 	layout.add(std::make_unique<AudioParameterChoice>(
 		stringmap.at(Params::highmid_band_RCmode),
 		stringmap.at(Params::highmid_band_RCmode),
-		juce::StringArray("Normal RC", "Procentual RC", "Level RC"),
+		RC_choices,
 		0
 	));
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::highmid_band_drive),
 		stringmap.at(Params::highmid_band_drive),
-		NormalisableRange<float>(1, 10, 0.1, 1.0f),
+		drive_range,
 		1
 	));
 
@@ -619,31 +629,31 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::high_band_threshold),
 		stringmap.at(Params::high_band_threshold),
-		NormalisableRange<float>(-60, 12, 1, 1),
+		threshold_range,
 		0));
 
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::high_band_ratio),
 		stringmap.at(Params::high_band_ratio),
-		NormalisableRange<float>(1, 100, 0.5f, 0.2f),
+		ratio_range,
 		4));
 
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::high_band_attack),
 		stringmap.at(Params::high_band_attack),
-		NormalisableRange<float>(5, 500, 1, 1),
+		attack_range,
 		5));
 
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::high_band_release),
 		stringmap.at(Params::high_band_release),
-		NormalisableRange<float>(5, 500, 1, 1),
+		release_range,
 		200));
 
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::high_band_makeup),
 		stringmap.at(Params::high_band_makeup),
-		NormalisableRange<float>(-120, 36, 0.5f, 2.65f),
+		makeup_range,
 		0));
 
 	layout.add(std::make_unique<AudioParameterBool>(
@@ -655,13 +665,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 	layout.add(std::make_unique<AudioParameterChoice>(
 		stringmap.at(Params::high_band_RCmode),
 		stringmap.at(Params::high_band_RCmode),
-		juce::StringArray("Normal RC", "Procentual RC", "Level RC"),
+		RC_choices,
 		0
 	));
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::high_band_drive),
 		stringmap.at(Params::high_band_drive),
-		NormalisableRange<float>(1, 10, 0.1, 1.0f),
+		drive_range,
 		1
 	));
 
