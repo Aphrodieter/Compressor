@@ -490,8 +490,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::low_band_makeup),
 		stringmap.at(Params::low_band_makeup),
-		NormalisableRange<float>(-120, 36, 0.5f, 2.7f),
-		1));
+		NormalisableRange<float>(-120, 36, 0.5f, 2.65f),
+		0));
 
 	layout.add(std::make_unique<AudioParameterBool>(
 		stringmap.at(Params::low_band_bypass),
@@ -542,8 +542,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::lowmid_band_makeup),
 		stringmap.at(Params::lowmid_band_makeup),
-		NormalisableRange<float>(-120, 36, 0.5f, 2.7f),
-		1));
+		NormalisableRange<float>(-120, 36, 0.5f, 2.65f),
+		0));
 
 	layout.add(std::make_unique<AudioParameterBool>(
 		stringmap.at(Params::lowmid_band_bypass),
@@ -592,8 +592,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::highmid_band_makeup),
 		stringmap.at(Params::highmid_band_makeup),
-		NormalisableRange<float>(-120, 36, 0.5f, 2.7f),
-		1));
+		NormalisableRange<float>(-120, 36, 0.5f, 2.65f),
+		0));
 
 	layout.add(std::make_unique<AudioParameterBool>(
 		stringmap.at(Params::highmid_band_bypass),
@@ -643,8 +643,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::high_band_makeup),
 		stringmap.at(Params::high_band_makeup),
-		NormalisableRange<float>(-120, 36, 0.5f, 2.7f),
-		1));
+		NormalisableRange<float>(-120, 36, 0.5f, 2.65f),
+		0));
 
 	layout.add(std::make_unique<AudioParameterBool>(
 		stringmap.at(Params::high_band_bypass),
@@ -731,8 +731,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::general_gain),
 		stringmap.at(Params::general_gain),
-		NormalisableRange<float>(-120, 36, 0.05, 2.7f),
-		1));
+		NormalisableRange<float>(-120, 36, 0.05, 2.65f),
+		0));
 
 
 
