@@ -497,6 +497,10 @@ public:
 		dry_wet_slider.setLookAndFeel(&generalControlLaf);
 		addAndMakeVisible(dry_wet_slider);
 
+		generalGainAttachement = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, stringMap.at(params::general_gain), general_gain_slider.getSlider());
+		general_gain_slider.setLookAndFeel(&generalControlLaf);
+		addAndMakeVisible(general_gain_slider);
+
 		external_sidechain_button.setClickingTogglesState(true);
 		external_sidechain_button_attachement =std::make_unique<AudioProcessorValueTreeState::ButtonAttachment>(apvts,  stringMap.at(params::external_sidechain), external_sidechain_button);
 
@@ -565,6 +569,8 @@ public:
 		auto drywetSlider_size = bounds.getHeight() - 70;
 		dry_wet_slider.setBounds(bounds.getWidth() - drywetSlider_size, bounds.getHeight()/2, drywetSlider_size, drywetSlider_size);
 
+		general_gain_slider.setBounds(bounds.getWidth() - drywetSlider_size*2, bounds.getHeight() / 2, drywetSlider_size, drywetSlider_size);
+
 
 		auto sidechain_button_size = 40;
 		external_sidechain_button.setBounds(5, bounds.getHeight()-5, sidechain_button_size, sidechain_button_size);
@@ -577,6 +583,7 @@ public:
 	}
 private:
 	LabelRotarySlider dry_wet_slider{ "Dry/Wet", 15.0f };
+	LabelRotarySlider general_gain_slider{ "Gain", 15.0f };
 	TextButton external_sidechain_button{ "SC" };
 
 	std::array<Slider, 3> sliders;
@@ -592,7 +599,7 @@ private:
 	TextButton& high_selector = bandSelectors[3];
 
 	std::array<std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment>, 3> attachements;
-	std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> dryWetAttachement;
+	std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> dryWetAttachement, generalGainAttachement;
 	std::unique_ptr<AudioProcessorValueTreeState::ButtonAttachment> external_sidechain_button_attachement;
 
 

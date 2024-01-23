@@ -78,6 +78,7 @@ CompressorAudioProcessor::CompressorAudioProcessor()
 
 	dry_wet = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::dry_wet)));
 	external_sidechain = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::external_sidechain)));
+	general_gain = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::general_gain)));
 
 }
 
@@ -408,10 +409,9 @@ void CompressorAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 			}
 		}
 	}
-
-
-	auto bl = juce::dsp::AudioBlock<float>(mainBuffer);
-	auto ctx = juce::dsp::ProcessContextReplacing<float>(bl);
+	
+	
+	mainBuffer.applyGain(Decibels::decibelsToGain(general_gain->get()));
 
 	//buffer = mainBuffer;
 	//waveshaper.process(ctx);
@@ -419,6 +419,7 @@ void CompressorAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 	/*if (low_compressor.bypass->get())
 		for (int i = 0; i < channel_n; i++)
 				buffer.addFrom(i, 0, invertedBuffer, i, 0, n);*/
+	midiMessages.clear();
 
 }
 
@@ -726,6 +727,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 		stringmap.at(Params::external_sidechain),
 		false
 	));
+
+	layout.add(std::make_unique<AudioParameterFloat>(
+		stringmap.at(Params::general_gain),
+		stringmap.at(Params::general_gain),
+		NormalisableRange<float>(-120, 36, 0.05, 2.7f),
+		1));
 
 
 

@@ -64,7 +64,8 @@ namespace params {
         highmid_high_cutoff,
 
         dry_wet,
-        external_sidechain
+        external_sidechain,
+        general_gain
     };
 
     static const std::map<Params, juce::String> getStringMap()
@@ -116,7 +117,8 @@ namespace params {
             {highmid_high_cutoff, "Highmid-High-Cutoff"},
 
             {dry_wet, "Dry_Wet"},
-            {external_sidechain, "External_Sidechain"}
+            {external_sidechain, "External_Sidechain"},
+            {general_gain, "General_Gain"}
         };
 
         return map;
@@ -246,6 +248,7 @@ private:
 
     juce::AudioParameterFloat* dry_wet{ nullptr };
     juce::AudioParameterBool* external_sidechain{ nullptr };
+    juce::AudioParameterFloat* general_gain{ nullptr };
 
     using Waveshaper = juce::dsp::WaveShaper<float, std::function<float(float)>>;
 
