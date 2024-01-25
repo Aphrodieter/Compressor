@@ -583,7 +583,7 @@ public:
 	}
 private:
 	LabelRotarySlider dry_wet_slider{ "Dry/Wet", 15.0f };
-	LabelRotarySlider general_gain_slider{ "Gain", 15.0f };
+	LabelRotarySlider general_gain_slider{ "Output Gain", 15.0f };
 	TextButton external_sidechain_button{ "SC" };
 
 	std::array<Slider, 3> sliders;

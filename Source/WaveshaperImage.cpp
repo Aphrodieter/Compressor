@@ -69,7 +69,7 @@ void WaveshaperImage::createImage(size_t i, Rectangle<int> bounds, float drive)
 
 
 	g.setColour(juce::Colours::black);
-	g.strokePath(path, PathStrokeType(5.0f));
+	g.strokePath(path, PathStrokeType(2.0f));
 
 
 	float zeroCrossing = (float)bounds.getHeight() / 2;
