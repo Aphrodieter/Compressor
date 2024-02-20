@@ -203,7 +203,7 @@ public:
 
 	void sliderValueChanged(Slider* slider) override
 	{
-		DBG(slider->getValue());
+		//DBG(slider->getValue());
 		auto imageN = currentImage->getImageCount();
 		auto imageIndex = (slider->getValue() - 1) * imageN / slider->getMaximum();
 		currentImage->setImageIndex(imageIndex);

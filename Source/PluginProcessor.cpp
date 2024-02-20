@@ -157,7 +157,10 @@ void CompressorAudioProcessor::setWaveshaperFunction(int waveshaperIndex, const 
 {
 	waveshapers[waveshaperIndex].functionToUse = [driveParam](float x)
 		{
-			return std::tanh(x * driveParam->get());
+			auto result = std::tanh(x * driveParam->get());
+			if (std::abs(result) > 1)
+				DBG("waveshaper result: " << result);
+			return result;
 		};
 }
 //==============================================================================
@@ -282,7 +285,7 @@ void CompressorAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 {
 	juce::ScopedNoDenormals noDenormals;
 	auto totalNumInputChannels = getTotalNumInputChannels();
-	DBG("Number Input Channels: " << totalNumInputChannels);
+	//DBG("Number Input Channels: " << totalNumInputChannels);
 	auto totalNumOutputChannels = getTotalNumOutputChannels();
 
 	// In case we have more outputs than inputs, this code clears any output
@@ -777,7 +780,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::output_gain),
 		stringmap.at(Params::output_gain),
-		NormalisableRange<float>(-96, 12, 0.05, 2.65f),
+		NormalisableRange<float>(-96, 36, 0.05, 2.15f),
 		0));
 
 
