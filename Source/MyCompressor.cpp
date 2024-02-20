@@ -79,6 +79,13 @@ void MyCompressor<SampleType>::setMakeup(SampleType makeup) {
     update();
 }
 
+template<typename SampleType>
+void MyCompressor<SampleType>::setKnee(SampleType newKnee)
+{
+    knee = newKnee;
+    update();
+}
+
 template <typename SampleType>
 void MyCompressor<SampleType>::setExternalSidechainMode(bool sidechain) {
     external_sidechain = sidechain;
@@ -116,9 +123,21 @@ SampleType MyCompressor<SampleType>::processSample(int channel, SampleType input
         x_g = juce::Decibels::gainToDecibels(std::abs(sidechainValue), minus_inf);
     else
         x_g = juce::Decibels::gainToDecibels(std::abs(inputValue), minus_inf);
-    auto y_g = (x_g < thresholddB) ? x_g : thresholddB + ((x_g - thresholddB) / ratio);
+
+    SampleType y_g = 0.0;
+
+    SampleType x_range = 2 * (x_g - thresholddB);
+    SampleType x_range_absolute = 2 * (std::abs(x_g - thresholddB));
+
+    if (x_range < -knee)
+        y_g = x_g;
+    if (x_range_absolute <= knee)
+        y_g = x_g + (1 /ratio - 1) * std::pow((x_g - thresholddB + knee / 2), 2) / (2 * knee);
+    if (x_range > knee)
+        y_g = thresholddB + ((x_g - thresholddB) / ratio);
 
     auto x_l = x_g - y_g;
+
     auto y_l = envelopeFilter.processSample(channel ,x_l);
 
     auto c = juce::Decibels::decibelsToGain(SampleType (makeupgain-y_l), minus_inf);

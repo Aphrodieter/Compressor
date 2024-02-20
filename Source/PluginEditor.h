@@ -295,20 +295,22 @@ public:
 		slider_attachment2.reset();
 		slider_attachment3.reset();
 		slider_attachment4.reset();
+		slider_attachment5.reset();
 		comboBoxAttachment.reset();
 		bypassAttachment.reset();
 		soloAttachment.reset();
 
 
-		std::array<String, 8> paramNames;
+		std::array<String, 9> paramNames;
 		paramNames[0] = bandName + " Threshold";
 		paramNames[1] = bandName + " Ratio";
 		paramNames[2] = bandName + " Attack";
 		paramNames[3] = bandName + " Release";
-		paramNames[4] = bandName + " Gain";
-		paramNames[5] = bandName + " RCMode";
-		paramNames[6] = bandName + " Bypass";
-		paramNames[7] = bandName + " Solo";
+		paramNames[4] = bandName + " Knee";
+		paramNames[5] = bandName + " Gain";
+		paramNames[6] = bandName + " RCMode";
+		paramNames[7] = bandName + " Bypass";
+		paramNames[8] = bandName + " Solo";
 
 
 		using namespace params;
@@ -318,10 +320,11 @@ public:
 		slider_attachment2 = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, paramNames[2], sliders[2].getSlider());
 		slider_attachment3 = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, paramNames[3], sliders[3].getSlider());
 		slider_attachment4 = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, paramNames[4], sliders[4].getSlider());
+		slider_attachment5 = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, paramNames[5], sliders[5].getSlider());
 
-		comboBoxAttachment = std::make_unique<AudioProcessorValueTreeState::ComboBoxAttachment>(apvts, paramNames[5], RCmode);
-		bypassAttachment = std::make_unique<AudioProcessorValueTreeState::ButtonAttachment>(apvts, paramNames[6], bypass);
-		soloAttachment = std::make_unique<AudioProcessorValueTreeState::ButtonAttachment>(apvts, paramNames[7], solo);
+		comboBoxAttachment = std::make_unique<AudioProcessorValueTreeState::ComboBoxAttachment>(apvts, paramNames[6], RCmode);
+		bypassAttachment = std::make_unique<AudioProcessorValueTreeState::ButtonAttachment>(apvts, paramNames[7], bypass);
+		soloAttachment = std::make_unique<AudioProcessorValueTreeState::ButtonAttachment>(apvts, paramNames[8], solo);
 	}
 
 	void paint(Graphics& g) override
@@ -380,7 +383,14 @@ private:
 	};
 
 	float textSize = 20.0f;
-	std::array<LabelRotarySlider, 5> sliders{ LabelRotarySlider("Threshold", textSize), LabelRotarySlider("Ratio", textSize), LabelRotarySlider("Attack", textSize), LabelRotarySlider("Release", textSize), LabelRotarySlider("Gain", textSize) };
+	std::array<LabelRotarySlider, 6> sliders{
+		LabelRotarySlider("Threshold", textSize),
+		LabelRotarySlider("Ratio", textSize),
+		LabelRotarySlider("Attack", textSize),
+		LabelRotarySlider("Release", textSize),
+		LabelRotarySlider("Knee", textSize),
+		LabelRotarySlider("Gain", textSize),
+	};
 
 	TextButton bypass{ "bypass" }, solo{ "solo" };
 	ComboBox RCmode{ "RCMode" };
@@ -388,7 +398,7 @@ private:
 	float  height{ 100 };
 	float width{ 100 };
 
-	std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> slider_attachment0, slider_attachment1, slider_attachment2, slider_attachment3, slider_attachment4;
+	std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> slider_attachment0, slider_attachment1, slider_attachment2, slider_attachment3, slider_attachment4, slider_attachment5;
 	std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> comboBoxAttachment;
 	std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> bypassAttachment, soloAttachment;
 
@@ -497,9 +507,17 @@ public:
 		dry_wet_slider.setLookAndFeel(&generalControlLaf);
 		addAndMakeVisible(dry_wet_slider);
 
-		generalGainAttachement = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, stringMap.at(params::general_gain), general_gain_slider.getSlider());
-		general_gain_slider.setLookAndFeel(&generalControlLaf);
-		addAndMakeVisible(general_gain_slider);
+
+		inputGainAttachement = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, stringMap.at(params::input_gain), input_gain_slider.getSlider());
+
+		outputGainAttachement = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, stringMap.at(params::output_gain), output_gain_slider.getSlider());
+
+		output_gain_slider.setLookAndFeel(&generalControlLaf);
+		input_gain_slider.setLookAndFeel(&generalControlLaf);
+
+		addAndMakeVisible(output_gain_slider);
+		//addAndMakeVisible(input_gain_slider);
+
 
 		external_sidechain_button.setClickingTogglesState(true);
 		external_sidechain_button_attachement =std::make_unique<AudioProcessorValueTreeState::ButtonAttachment>(apvts,  stringMap.at(params::external_sidechain), external_sidechain_button);
@@ -507,7 +525,6 @@ public:
 		external_sidechain_button.setColour(TextButton::ColourIds::buttonOnColourId, Colours::yellowgreen);
 
 		addAndMakeVisible(external_sidechain_button);
-
 	}
 
 	void buttonClicked(Button* button) override
@@ -566,14 +583,17 @@ public:
 		generalControlBox.items.add(FlexItem(dry_wet_slider).withFlex(1.0f));
 		generalControlBox.performLayout(bounds.removeFromBottom(bounds.getHeight()/2));*/
 
-		auto drywetSlider_size = bounds.getHeight() - 70;
-		dry_wet_slider.setBounds(bounds.getWidth() - drywetSlider_size, bounds.getHeight()/2, drywetSlider_size, drywetSlider_size);
+		auto drywetSlider_size = bounds.getHeight() - 90;
+		auto heightAdjust = 30;
+		dry_wet_slider.setBounds(bounds.getWidth() - drywetSlider_size, bounds.getHeight()/2 + heightAdjust, drywetSlider_size, drywetSlider_size);
 
-		general_gain_slider.setBounds(bounds.getWidth() - drywetSlider_size*2, bounds.getHeight() / 2, drywetSlider_size, drywetSlider_size);
+		input_gain_slider.setBounds(bounds.getWidth() - drywetSlider_size * 3, bounds.getHeight() / 2 + heightAdjust, drywetSlider_size, drywetSlider_size);
+
+		output_gain_slider.setBounds(bounds.getWidth() - drywetSlider_size*2, bounds.getHeight() / 2 + heightAdjust, drywetSlider_size, drywetSlider_size);
 
 
 		auto sidechain_button_size = 40;
-		external_sidechain_button.setBounds(5, bounds.getHeight()-5, sidechain_button_size, sidechain_button_size);
+		external_sidechain_button.setBounds(5, bounds.getHeight()-1, sidechain_button_size, sidechain_button_size);
 
 		auto text = control_area_text.getText();
 		auto font = control_area_text.getFont();
@@ -583,7 +603,8 @@ public:
 	}
 private:
 	LabelRotarySlider dry_wet_slider{ "Dry/Wet", 15.0f };
-	LabelRotarySlider general_gain_slider{ "Output Gain", 15.0f };
+	LabelRotarySlider output_gain_slider{ "Output Gain", 15.0f };
+	LabelRotarySlider input_gain_slider{ "Input Gain", 15.0f };
 	TextButton external_sidechain_button{ "SC" };
 
 	std::array<Slider, 3> sliders;
@@ -599,7 +620,7 @@ private:
 	TextButton& high_selector = bandSelectors[3];
 
 	std::array<std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment>, 3> attachements;
-	std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> dryWetAttachement, generalGainAttachement;
+	std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> dryWetAttachement, inputGainAttachement, outputGainAttachement;
 	std::unique_ptr<AudioProcessorValueTreeState::ButtonAttachment> external_sidechain_button_attachement;
 
 

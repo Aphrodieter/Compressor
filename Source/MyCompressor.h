@@ -57,6 +57,8 @@ public:
 
     void setMakeup(SampleType makeup);
 
+    void setKnee(SampleType knee);
+
     void setExternalSidechainMode(bool sidechain);
 
     //==============================================================================
@@ -78,7 +80,6 @@ public:
 
         jassert(inputBlock.getNumChannels() == numChannels);
         jassert(inputBlock.getNumSamples() == numSamples);
-        jassert(sidechainBuffer.getNumSamples() == numSamples);
         
 
         if (context.isBypassed)
@@ -118,6 +119,6 @@ private:
     SampleType minus_inf = static_cast<SampleType> (-200.0);
 
     double sampleRate = 44100.0;
-    SampleType thresholddB = 0.0, ratio = 1.0, attackTime = 1.0, releaseTime = 100.0, makeupgain = 1.0;
+    SampleType thresholddB = 0.0, ratio = 1.0, attackTime = 1.0, releaseTime = 100.0, makeupgain = 1.0, knee = 0.0;
     
 };

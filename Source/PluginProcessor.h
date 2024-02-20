@@ -27,6 +27,7 @@ namespace params {
         low_band_solo,
         low_band_RCmode,
         low_band_drive,
+        low_band_knee,
 
 
         lowmid_band_threshold,
@@ -38,6 +39,7 @@ namespace params {
         lowmid_band_solo,
         lowmid_band_RCmode,
         lowmid_band_drive,
+        lowmid_band_knee,
 
         highmid_band_threshold,
         highmid_band_ratio,
@@ -48,6 +50,7 @@ namespace params {
         highmid_band_solo,
         highmid_band_RCmode,
         highmid_band_drive,
+        highmid_band_knee,
 
         high_band_threshold,
         high_band_ratio,
@@ -58,6 +61,7 @@ namespace params {
         high_band_solo,
         high_band_RCmode,
         high_band_drive,
+        high_band_knee,
 
         low_lowmid_cutoff,
         lowmid_highmid_cutoff,
@@ -65,7 +69,8 @@ namespace params {
 
         dry_wet,
         external_sidechain,
-        general_gain
+        output_gain,
+        input_gain
     };
 
     static const std::map<Params, juce::String> getStringMap()
@@ -81,6 +86,7 @@ namespace params {
             {low_band_solo, "Lowband Solo"},
             {low_band_RCmode, "Lowband RCMode"},
             {low_band_drive, "Lowband Drive"},
+            {low_band_knee, "Lowband Knee"},
 
             {lowmid_band_threshold, "Low-Midband Threshold"},
             {lowmid_band_ratio, "Low-Midband Ratio"},
@@ -91,6 +97,7 @@ namespace params {
             {lowmid_band_solo, "Low-Midband Solo"},
             {lowmid_band_RCmode, "Low-Midband RCMode"},
             {lowmid_band_drive, "Low-Midband Drive"},
+            {lowmid_band_knee, "Low-Midband Knee"},
             
             {highmid_band_threshold, "High-Midband Threshold"},
             {highmid_band_ratio, "High-Midband Ratio"},
@@ -101,6 +108,8 @@ namespace params {
             {highmid_band_solo, "High-Midband Solo"},
             {highmid_band_RCmode, "High-Midband RCMode"},
             {highmid_band_drive, "High-Midband Drive"},
+            {highmid_band_knee, "High-Midband Knee"},
+
            
             {high_band_threshold, "Highband Threshold"},
             {high_band_ratio, "Highband Ratio"},
@@ -111,6 +120,8 @@ namespace params {
             {high_band_solo, "Highband Solo"},
             {high_band_RCmode, "Highband RCMode"},
             {high_band_drive, "Highband Drive"},
+            {high_band_knee, "Highband Knee"},
+
             
             {low_lowmid_cutoff, "Low-Lowmid-Cutoff"},
             {lowmid_highmid_cutoff, "Lowmid-Highmid-Cutoff"},
@@ -118,7 +129,8 @@ namespace params {
 
             {dry_wet, "Dry_Wet"},
             {external_sidechain, "External_Sidechain"},
-            {general_gain, "General_Gain"}
+            {output_gain, "Output_Gain"},
+            {input_gain, "Input_Gain"},
         };
 
         return map;
@@ -136,6 +148,7 @@ class Compressorband
         juce::AudioParameterFloat* makeup{ nullptr };
         juce::AudioParameterBool* bypass{ nullptr };
         juce::AudioParameterChoice* RCMode{ nullptr };
+        juce::AudioParameterFloat* knee{ nullptr };
 
         MyCompressor<float> compressor;
     
@@ -147,6 +160,7 @@ class Compressorband
             compressor.setRatio(ratio->get());
             compressor.setMakeup(makeup->get());
             compressor.setRCMode(RCMode->getIndex());
+            compressor.setKnee(knee->get());
         }
 
         void setSidechainMode(bool sidechain)
@@ -248,7 +262,8 @@ private:
 
     juce::AudioParameterFloat* dry_wet{ nullptr };
     juce::AudioParameterBool* external_sidechain{ nullptr };
-    juce::AudioParameterFloat* general_gain{ nullptr };
+    juce::AudioParameterFloat* output_gain{ nullptr };
+    juce::AudioParameterFloat* input_gain{ nullptr };
 
     using Waveshaper = juce::dsp::WaveShaper<float, std::function<float(float)>>;
 

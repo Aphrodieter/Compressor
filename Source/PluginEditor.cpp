@@ -23,7 +23,7 @@ CompressorAudioProcessorEditor::CompressorAudioProcessorEditor (CompressorAudioP
     addAndMakeVisible(filterControls);
     //addAndMakeVisible(generalControls);
     addAndMakeVisible(saturationControls);
-    setSize (1000, 500);
+    setSize (1000, 400);
 
     
 
@@ -58,7 +58,7 @@ void CompressorAudioProcessorEditor::resized()
 
     saturationControls.setBounds(bounds.removeFromRight(bounds.getWidth()/6));
 
-    compressorControls.setBounds(bounds.removeFromTop(getHeight()/2));
+    compressorControls.setBounds(bounds.removeFromTop(getHeight()/3));
     //generalControls.setBounds(bounds.removeFromBottom(getHeight() / 6));
     filterControls.setBounds(bounds);
 
