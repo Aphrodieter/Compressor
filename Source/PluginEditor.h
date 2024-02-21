@@ -280,9 +280,8 @@ public:
 		addAndMakeVisible(solo);
 
 
-		RCmode.addItem("normal", 1);
-		RCmode.addItem("percentual", 2);
-		RCmode.addItem("level", 3);
+		RCmode.addItem("Normal", 1);
+		RCmode.addItem("Fast", 2);
 		RCmode.setSelectedItemIndex(0);
 
 		addAndMakeVisible(RCmode);
@@ -593,7 +592,7 @@ public:
 
 
 		auto sidechain_button_size = 40;
-		external_sidechain_button.setBounds(5, bounds.getHeight()-1, sidechain_button_size, sidechain_button_size);
+		external_sidechain_button.setBounds(5, bounds.getHeight()-5, sidechain_button_size, sidechain_button_size);
 
 		auto text = control_area_text.getText();
 		auto font = control_area_text.getFont();

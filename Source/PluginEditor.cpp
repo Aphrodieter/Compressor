@@ -58,7 +58,7 @@ void CompressorAudioProcessorEditor::resized()
 
     saturationControls.setBounds(bounds.removeFromRight(bounds.getWidth()/6));
 
-    compressorControls.setBounds(bounds.removeFromTop(getHeight()/3));
+    compressorControls.setBounds(bounds.removeFromTop(getHeight()/2.5));
     //generalControls.setBounds(bounds.removeFromBottom(getHeight() / 6));
     filterControls.setBounds(bounds);
 

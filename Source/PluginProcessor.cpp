@@ -477,7 +477,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 	auto knee_range = NormalisableRange<float>(0, 72, 0.1f, 1.0f);
 
 
-	auto RC_choices = juce::StringArray("Normal RC", "Procentual RC", "Level RC");
+	auto RC_choices = juce::StringArray("Normal", "Fast");
 	auto drive_range = NormalisableRange<float>(1, 10, 0.1, 1.0f);
 
 	//lowband
