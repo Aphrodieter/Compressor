@@ -75,10 +75,15 @@ CompressorAudioProcessor::CompressorAudioProcessor()
 	high_compressor.RCMode = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter(stringmap.at(Params::high_band_RCmode)));
 
 
-	low_band_drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::low_band_drive)));
-	lowmid_band_drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::lowmid_band_drive)));
-	highmid_band_drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::highmid_band_drive)));
-	high_band_drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::high_band_drive)));
+	low_waveshaper.drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::low_band_drive)));
+	lowmid_waveshaper.drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::lowmid_band_drive)));
+	highmid_waveshaper.drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::highmid_band_drive)));
+	high_waveshaper.drive = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::high_band_drive)));
+
+	low_waveshaper.bypass = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::low_band_waveshaper_bypass)));
+	lowmid_waveshaper.bypass = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::lowmid_band_waveshaper_bypass)));
+	highmid_waveshaper.bypass = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::highmid_band_waveshaper_bypass)));
+	high_waveshaper.bypass = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::high_band_waveshaper_bypass)));
 
 	dry_wet = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(stringmap.at(Params::dry_wet)));
 	external_sidechain = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(stringmap.at(Params::external_sidechain)));
@@ -148,17 +153,6 @@ const juce::String CompressorAudioProcessor::getProgramName(int index)
 void CompressorAudioProcessor::changeProgramName(int index, const juce::String& newName)
 {
 }
-
-void CompressorAudioProcessor::setWaveshaperFunction(int waveshaperIndex, const juce::AudioParameterFloat* driveParam)
-{
-	waveshapers[waveshaperIndex].functionToUse = [driveParam](float x)
-		{
-			auto result = std::tanh(x * driveParam->get());
-			if (std::abs(result) > 1)
-				DBG("waveshaper result: " << result);
-			return result;
-		};
-}
 //==============================================================================
 void CompressorAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
@@ -210,27 +204,6 @@ void CompressorAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBl
 	for (auto& waveshaper : waveshapers) {
 		waveshaper.prepare(spec);
 	}
-	
-	/*waveshapers[0].functionToUse = [&](float x)
-		{
-			return std::tanh(x * low_band_drive->get());
-		};
-	waveshapers[1].functionToUse = [&](float x)
-		{
-			return std::tanh(x * lowmid_band_drive->get());
-		};
-	waveshapers[2].functionToUse = [&](float x)
-		{
-			return std::tanh(x * highmid_band_drive->get());
-		};
-	waveshapers[3].functionToUse = [&](float x)
-		{
-			return std::tanh(x * high_band_drive->get());
-		};*/
-	setWaveshaperFunction(0, low_band_drive);
-	setWaveshaperFunction(1, lowmid_band_drive);
-	setWaveshaperFunction(2, highmid_band_drive);
-	setWaveshaperFunction(3, high_band_drive);
 
 }
 
@@ -378,14 +351,17 @@ void CompressorAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 
 	dryBuffers[1].makeCopyOf(buffers[1]);
 
-
+	for (int i = 0; i < waveshapers.size(); i++)
+	{
+		if (!waveshapers[i].bypass->get()) {
+			oversampling.processSamplesUp(ctxs[i].getInputBlock());
+			waveshapers[i].process(ctxs[i]);
+			oversampling.processSamplesDown(ctxs[i].getOutputBlock());
+		}
+	}
 
 	for (int i = 0; i < compressors.size(); i++)
 	{
-		oversampling.processSamplesUp(ctxs[i].getInputBlock());
-		waveshapers[i].process(ctxs[i]);
-		oversampling.processSamplesDown(ctxs[i].getOutputBlock());
-
 		compressors[i].updateCompressorSettings();
 		compressors[i].setSidechainMode(external_sidechain->get());
 		compressors[i].process(ctxs[i], sidechainBuffer);
@@ -533,6 +509,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 		1
 	));
 
+	layout.add(std::make_unique<AudioParameterBool>(
+		stringmap.at(Params::low_band_waveshaper_bypass),
+		stringmap.at(Params::low_band_waveshaper_bypass),
+		true
+	));
+
 
 	//lowmid band
 
@@ -591,6 +573,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 		1
 	));
 
+	layout.add(std::make_unique<AudioParameterBool>(
+		stringmap.at(Params::lowmid_band_waveshaper_bypass),
+		stringmap.at(Params::lowmid_band_waveshaper_bypass),
+		true
+	));
+
 	//highmid band
 	layout.add(std::make_unique<AudioParameterFloat>(
 		stringmap.at(Params::highmid_band_threshold),
@@ -645,6 +633,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 		stringmap.at(Params::highmid_band_drive),
 		drive_range,
 		1
+	));
+
+	layout.add(std::make_unique<AudioParameterBool>(
+		stringmap.at(Params::highmid_band_waveshaper_bypass),
+		stringmap.at(Params::highmid_band_waveshaper_bypass),
+		true
 	));
 
 	//high band
@@ -702,6 +696,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 		stringmap.at(Params::high_band_drive),
 		drive_range,
 		1
+	));
+
+	layout.add(std::make_unique<AudioParameterBool>(
+		stringmap.at(Params::high_band_waveshaper_bypass),
+		stringmap.at(Params::high_band_waveshaper_bypass),
+		true
 	));
 
 

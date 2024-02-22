@@ -27,6 +27,8 @@ static const juce::Colour HIGH_BAND_COLOR = { 181, 181, 29 };// juce::Colours::l
 
 static const juce::Colour SLIDER_KNOB_COLOR = { 102, 58, 24 };
 
+static const juce::Colour BYPASSED_COLOR = { 135, 31, 31 };
+
 
 
 using namespace juce;
@@ -177,6 +179,11 @@ public:
 		//drive.setLookAndFeel(&laf);
 		addAndMakeVisible(drive);
 
+		bypass.setClickingTogglesState(true);
+		bypass.setColour(TextButton::ColourIds::buttonOnColourId, BYPASSED_COLOR);
+
+		addAndMakeVisible(bypass);
+
 		currentImage = &waveshaperImages[0];
 		currentImage->setVisible(true);
 
@@ -186,8 +193,13 @@ public:
 	void makeAttachements(const String& bandName)
 	{
 		sliderAttachment.reset();
+		buttonAttachment.reset();
+
 		auto driveParameter = bandName + " Drive";
+		auto bypassParameter = bandName + " WaveshaperBypass";
 		sliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(apvts, driveParameter, drive.getSlider());
+
+		buttonAttachment = std::make_unique<AudioProcessorValueTreeState::ButtonAttachment>(apvts, bypassParameter, bypass);
 
 
 	}
@@ -230,8 +242,9 @@ public:
 		auto bounds = getLocalBounds();
 		auto height = bounds.getHeight();
 		auto width = bounds.getWidth();
-
-		drive.setBounds(bounds.removeFromBottom(bounds.getHeight() / 2));
+		
+		drive.setBounds(bounds.removeFromBottom(bounds.getHeight() / 2.5));
+		bypass.setBounds(bounds.removeFromBottom(bounds.getHeight() / 5).reduced(40, 0));
 		for (auto& image : waveshaperImages)
 		{
 			image.setBounds(bounds.reduced(20, 20));
@@ -239,6 +252,7 @@ public:
 	}
 private:
 	LabelRotarySlider drive{ "Drive" , 30.0f };
+	TextButton bypass{"Bypass"};
 	std::array<WaveshaperImage, 4> waveshaperImages{
 		LOW_BAND_COLOR,
 		LOWMID_BAND_COLOR,
@@ -249,6 +263,7 @@ private:
 	Colour color;
 	AudioProcessorValueTreeState& apvts;
 	std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> sliderAttachment;
+	std::unique_ptr<AudioProcessorValueTreeState::ButtonAttachment> buttonAttachment;
 	BandLookAndFeel laf{ Colours::black };
 };
 
@@ -273,8 +288,8 @@ public:
 		bypass.changeWidthToFitText();
 		solo.changeWidthToFitText();
 
-		bypass.setColour(TextButton::ColourIds::buttonOnColourId, Colours::red);
-		solo.setColour(TextButton::ColourIds::buttonOnColourId, Colours::red);
+		bypass.setColour(TextButton::ColourIds::buttonOnColourId, BYPASSED_COLOR);
+		solo.setColour(TextButton::ColourIds::buttonOnColourId, BYPASSED_COLOR);
 
 		addAndMakeVisible(bypass);
 		addAndMakeVisible(solo);
@@ -391,7 +406,7 @@ private:
 		LabelRotarySlider("Gain", textSize),
 	};
 
-	TextButton bypass{ "bypass" }, solo{ "solo" };
+	TextButton bypass{ "Bypass" }, solo{ "Solo" };
 	ComboBox RCmode{ "RCMode" };
 
 	float  height{ 100 };

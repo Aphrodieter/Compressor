@@ -27,6 +27,7 @@ namespace params {
         low_band_solo,
         low_band_RCmode,
         low_band_drive,
+        low_band_waveshaper_bypass,
         low_band_knee,
 
 
@@ -39,6 +40,7 @@ namespace params {
         lowmid_band_solo,
         lowmid_band_RCmode,
         lowmid_band_drive,
+        lowmid_band_waveshaper_bypass,
         lowmid_band_knee,
 
         highmid_band_threshold,
@@ -50,6 +52,7 @@ namespace params {
         highmid_band_solo,
         highmid_band_RCmode,
         highmid_band_drive,
+        highmid_band_waveshaper_bypass,
         highmid_band_knee,
 
         high_band_threshold,
@@ -61,6 +64,7 @@ namespace params {
         high_band_solo,
         high_band_RCmode,
         high_band_drive,
+        high_band_waveshaper_bypass,
         high_band_knee,
 
         low_lowmid_cutoff,
@@ -86,6 +90,7 @@ namespace params {
             {low_band_solo, "Lowband Solo"},
             {low_band_RCmode, "Lowband RCMode"},
             {low_band_drive, "Lowband Drive"},
+            {low_band_waveshaper_bypass, "Lowband WaveshaperBypass"},
             {low_band_knee, "Lowband Knee"},
 
             {lowmid_band_threshold, "Low-Midband Threshold"},
@@ -97,6 +102,7 @@ namespace params {
             {lowmid_band_solo, "Low-Midband Solo"},
             {lowmid_band_RCmode, "Low-Midband RCMode"},
             {lowmid_band_drive, "Low-Midband Drive"},
+            {lowmid_band_waveshaper_bypass, "Low-Midband WaveshaperBypass"},
             {lowmid_band_knee, "Low-Midband Knee"},
             
             {highmid_band_threshold, "High-Midband Threshold"},
@@ -108,6 +114,7 @@ namespace params {
             {highmid_band_solo, "High-Midband Solo"},
             {highmid_band_RCmode, "High-Midband RCMode"},
             {highmid_band_drive, "High-Midband Drive"},
+            {highmid_band_waveshaper_bypass, "High-Midband WaveshaperBypass"},
             {highmid_band_knee, "High-Midband Knee"},
 
            
@@ -120,6 +127,7 @@ namespace params {
             {high_band_solo, "Highband Solo"},
             {high_band_RCmode, "Highband RCMode"},
             {high_band_drive, "Highband Drive"},
+            {high_band_waveshaper_bypass, "Highband WaveshaperBypass"},
             {high_band_knee, "Highband Knee"},
 
             
@@ -182,6 +190,40 @@ class Compressorband
         }
 };
 
+
+class WaveshaperBand
+{
+public:
+    using Waveshaper = juce::dsp::WaveShaper<float, std::function<float(float)>>;
+    Waveshaper waveshaper;
+    juce::AudioParameterFloat* drive{ nullptr };
+    juce::AudioParameterBool* bypass{ nullptr };
+
+    WaveshaperBand()
+    {
+        waveshaper.functionToUse = [this](float x)
+            {
+                auto result = std::tanh(x * drive->get());
+                if (std::abs(result) > 1)
+                    DBG("waveshaper result: " << result);
+                return result;
+            };
+    }
+
+    void prepare(juce::dsp::ProcessSpec spec)
+    {
+        waveshaper.prepare(spec);
+    }
+
+    void process(juce::dsp::ProcessContextReplacing<float> ctx)
+    {
+        waveshaper.process(ctx);
+    }
+    
+
+
+};
+
 class CompressorAudioProcessor : public juce::AudioProcessor
 #if JucePlugin_Enable_ARA
     , public juce::AudioProcessorARAExtension
@@ -192,7 +234,6 @@ public:
     CompressorAudioProcessor();
     ~CompressorAudioProcessor() override;
 
-    void setWaveshaperFunction(int waveshaperIndex, const juce::AudioParameterFloat* driveParam);
     //==============================================================================
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
@@ -255,11 +296,6 @@ private:
     juce::AudioParameterBool* highmid_band_solo{ nullptr };
     juce::AudioParameterBool* high_band_solo{ nullptr };
 
-    juce::AudioParameterFloat* low_band_drive{ nullptr };
-    juce::AudioParameterFloat* lowmid_band_drive{ nullptr };
-    juce::AudioParameterFloat* highmid_band_drive{ nullptr };
-    juce::AudioParameterFloat* high_band_drive{ nullptr };
-
     juce::AudioParameterFloat* dry_wet{ nullptr };
     juce::AudioParameterBool* external_sidechain{ nullptr };
     juce::AudioParameterFloat* output_gain{ nullptr };
@@ -267,11 +303,11 @@ private:
 
     using Waveshaper = juce::dsp::WaveShaper<float, std::function<float(float)>>;
 
-    std::array<Waveshaper, 4> waveshapers;
-    Waveshaper& low_waveshaper = waveshapers[0];
-    Waveshaper& lowmid_waveshaper = waveshapers[1];
-    Waveshaper& highmid_waveshaper = waveshapers[2];
-    Waveshaper& high_waveshaper = waveshapers[3];
+    std::array<WaveshaperBand, 4> waveshapers;
+    WaveshaperBand& low_waveshaper = waveshapers[0];
+    WaveshaperBand& lowmid_waveshaper = waveshapers[1];
+    WaveshaperBand& highmid_waveshaper = waveshapers[2];
+    WaveshaperBand& high_waveshaper = waveshapers[3];
 
     
 
