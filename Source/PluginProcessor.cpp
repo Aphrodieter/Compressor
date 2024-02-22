@@ -108,11 +108,7 @@ bool CompressorAudioProcessor::acceptsMidi() const
 
 bool CompressorAudioProcessor::producesMidi() const
 {
-	#if JucePlugin_ProducesMidiOutput
-	return true;
-	#else
 	return false;
-	#endif
 }
 
 bool CompressorAudioProcessor::isMidiEffect() const
@@ -471,8 +467,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout CompressorAudioProcessor::cr
 
 	auto threshold_range = NormalisableRange<float>(-60, 12, 1, 1);
 	auto ratio_range = NormalisableRange<float>(1, 100, 0.5f, 0.2f);
-	auto attack_range = NormalisableRange<float>(5, 500, 1, 1);
-	auto release_range = NormalisableRange<float>(5, 500, 1, 1);
+	auto attack_range = NormalisableRange<float>(1, 300, 1, 1);
+	auto release_range = NormalisableRange<float>(1, 500, 1, 1);
 	auto makeup_range = NormalisableRange<float>(-120, 36, 0.5f, 2.65f);
 	auto knee_range = NormalisableRange<float>(0, 72, 0.1f, 1.0f);
 
